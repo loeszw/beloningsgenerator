@@ -281,6 +281,9 @@ const GROEP_LABEL={essentieel:"Essentieel voor de inrichting",structureel:"Struc
 const GROEP_RANG={essentieel:0,structureel:1,voorwaardelijk:2};
 function groep(x){ if(ESSENTIEEL.has(x.subkop)) return "essentieel"; return x.toepassing==="voorwaardelijk"?"voorwaardelijk":"structureel"; }
 function sorteerSleutel(x){ const g=groep(x); return GROEP_RANG[g]*1000+(g==="essentieel"?ESSENTIEEL.get(x.subkop):kopVolgorde(x.subkop)); }
+function kortDoc(n){ return String(n||"Bron").replace(/\.pdf$/i,"").replace(/\(\d+\)$/,"").replace(/[_]+/g," ").replace(/\s+/g," ").trim(); }
+function isFormulierDoc(naam,d){ const n=String(naam||"").toLowerCase(); return /formulier|uitvraag|sugb|wijzerbelonen/.test(n) || (d&&d.meta&&d.meta.bron_naam&&n===String(d.meta.bron_naam).toLowerCase()); }
+function bronOpties(c){ return (c.bronnen||[]).map((b,i)=>({b,i})).filter(x=>x.b.tekst); }
 function heeftCaoRef(d){
   if(!d.cao||!d.cao.van_toepassing) return false;
   if(d.meta&&d.meta.cao_referentie===false) return false;
@@ -350,6 +353,17 @@ function verzamel(state){
   for(const c of state.ctrl){
     const toel=(c.tekst||"").trim();
     if(c.keuze==="cao"){ caoToepassen.push(c); correcties.push({subkop:c.subkop,inFormulier:c.waarde_in_bron,geldt:`Voor de uitzendkracht geldt de cao: ${c.waarde_cao||"zie cao-bepaling"}`}); }
+    else if(String(c.keuze).startsWith("bronidx:")){
+      const b=(c.bronnen||[])[+c.keuze.split(":")[1]]||{};
+      const tekst=toel||b.tekst||"";
+      const ref=[kortDoc(b.document),b.vindplaats].filter(Boolean).join(", ");
+      if(isFormulierDoc(b.document,state.data)) afwijkingen.push({subkop:c.subkop,tekst,bron:ref,herkomst:"bevestigd",toepassing:c.toepassing});
+      else {
+        afwijkingen.push({subkop:c.subkop,tekst,bron:ref,herkomst:"correctie",toepassing:c.toepassing});
+        const form=(c.bronnen||[]).find(x=>isFormulierDoc(x.document,state.data)&&x.tekst);
+        correcties.push({subkop:c.subkop,inFormulier:form?form.tekst:c.waarde_in_bron,geldt:`${tekst} (bron: ${ref})`});
+      }
+    }
     else if(c.keuze==="correctie"){ afwijkingen.push({subkop:c.subkop,tekst:toel,bron:"correctie",herkomst:"correctie",toepassing:c.toepassing}); correcties.push({subkop:c.subkop,inFormulier:c.waarde_in_bron,geldt:toel}); }
     else if(c.keuze==="bron"){ afwijkingen.push({subkop:c.subkop,tekst:toel?`${c.waarde_in_bron} (${toel})`:c.waarde_in_bron,bron:"bevestigd",herkomst:"bevestigd",toepassing:c.toepassing,voorwaarden:c.signaal==="voorwaarde_toetsen"?(c.reden||""):""}); }
     else if(c.keuze==="vervalt"){ vervallen.push(c); }
@@ -839,11 +853,20 @@ function renderControles(){
     const s=SIGNAAL[c.signaal]||{label:c.signaal,cls:"s-ondu"};
     const ref=heeftCaoRef(state.data);
     let keuzes=c.signaal==="voorwaarde_toetsen"?KEUZES_VOORW:KEUZES.filter(([k])=>ref||k!=="cao");
+    const bo=bronOpties(c);
+    if(bo.length>=2 && c.signaal!=="voorwaarde_toetsen"){
+      keuzes=[
+        ...bo.map(({b,i})=>[`bronidx:${i}`,`Klopt: ${kortDoc(b.document)}`]),
+        ...(ref?[["cao","Cao geldt (Caoloon-uitdraai)"]]:[]),
+        ["correctie","Combinatie of anders: zelf invullen wat geldt"],
+        ["vervalt","Niet van toepassing, vervalt"]
+      ];
+    }
     if(groep(c)==="voorwaardelijk" && !keuzes.some(([k])=>k==="pergeval")) keuzes=[["pergeval","Per geval bepalen door de backoffice"],...keuzes];
     const vergelijk=(c.bronnen||[]).filter(b=>b.tekst).length>=2
       ? `<div class="compare">${c.bronnen.filter(b=>b.tekst).map(b=>`<div><span>${esc(b.document||"Bron")}${b.vindplaats?", "+esc(b.vindplaats):""}</span>${esc(b.tekst)}</div>`).join("")}</div>`
       : `<div class="compare"><div><span>In het formulier</span>${esc(c.waarde_in_bron)}</div><div><span>Volgens de cao</span>${esc(c.waarde_cao||"—")}</div></div>`;
-    const tekstLabel=c.keuze==="correctie"?"Wat geldt volgens de opdrachtgever (komt in de aanvulling)":c.keuze==="bron"&&c.signaal==="mogelijk_onder_cao"?"Waarom is dit niet lager dan de cao? (verplicht)":"Antwoord of toelichting (optioneel)";
+    const tekstLabel=String(c.keuze).startsWith("bronidx:")?"Wat geldt (overgenomen uit de gekozen bron; pas aan als nodig)":c.keuze==="correctie"?"Wat geldt volgens de opdrachtgever (komt in de aanvulling)":c.keuze==="bron"&&c.signaal==="mogelijk_onder_cao"?"Waarom is dit niet lager dan de cao? (verplicht)":"Antwoord of toelichting (optioneel)";
     return kopHtml+`<article class="ctrl ${s.cls} ${controleGeldig(c)?"done":""}" data-i="${i}">
       <div class="ctrl-head"><h3>${esc(c.subkop)}</h3><span class="ctrl-tags">${toepHtml}<span class="pill">${esc(s.label)}</span></span></div>
       ${vergelijk}
@@ -853,7 +876,9 @@ function renderControles(){
     </article>`;
   }).join("");
   document.querySelectorAll(".ctrl input[type=radio]").forEach(r=>r.onchange=e=>{
-    const i=+e.target.closest(".ctrl").dataset.i; state.ctrl[i].keuze=e.target.value; renderControles(); renderKnoppen(); updateTeller();
+    const i=+e.target.closest(".ctrl").dataset.i, c=state.ctrl[i], oud=c.keuze; c.keuze=e.target.value;
+    if(c.keuze.startsWith("bronidx:")){ const b=c.bronnen[+c.keuze.split(":")[1]]; const vorigeAuto=oud&&oud.startsWith("bronidx:")?(c.bronnen[+oud.split(":")[1]]||{}).tekst:""; if(!c.tekst||c.tekst===vorigeAuto) c.tekst=b.tekst||""; }
+    renderControles(); renderKnoppen(); updateTeller();
     document.querySelector(`.ctrl[data-i="${i}"] input[value="${e.target.value}"]`)?.focus();
   });
   document.querySelectorAll("[data-ctoep]").forEach(sel=>sel.onchange=e=>{ const c=state.ctrl[+e.target.dataset.ctoep]; c.toepassing=e.target.value;
