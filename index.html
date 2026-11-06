@@ -45,9 +45,10 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Barlow",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 h1,h2,.step-nr,.modes button{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
-.band{background:var(--band);color:var(--band-ink);padding:calc(28px + env(safe-area-inset-top,0px)) 0 30px}
+.band{background:var(--band);color:var(--band-ink);padding:calc(22px + env(safe-area-inset-top,0px)) 0 22px}
 .band-in{max-width:920px;margin:0 auto;padding:0 20px}
-.logo{display:block;height:40px;width:auto;margin:0 0 14px}
+.logo{display:block;height:40px;width:auto;margin:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .band h1 span{color:var(--accent)}
 main{max-width:920px;margin:0 auto;padding:32px 20px 80px}
 h1{font-size:clamp(2.4rem,6vw,3.6rem);line-height:1;margin:0;font-weight:800}
@@ -139,7 +140,7 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
 </style>
 </head>
 <body data-mode="1">
-<header class="band"><div class="band-in"><img class="logo" id="logo" alt="IU Groep" width="148" height="40"><h1>Beloning<span>generator</span></h1></div></header>
+<header class="band"><div class="band-in"><img class="logo" id="logo" alt="IU Groep" width="148" height="40"><h1 class="sr-only">Beloningsgenerator</h1></div></header>
 <main>
   <p class="lead">Leg de arbeidsvoorwaarden van de opdrachtgever vast en maak de documenten voor de backoffice en HelloFlex. Alles blijft in deze browser; er wordt niets opgeslagen of verstuurd.</p>
 
@@ -280,6 +281,19 @@ const GROEP_LABEL={essentieel:"Essentieel voor de inrichting",structureel:"Struc
 const GROEP_RANG={essentieel:0,structureel:1,voorwaardelijk:2};
 function groep(x){ if(ESSENTIEEL.has(x.subkop)) return "essentieel"; return x.toepassing==="voorwaardelijk"?"voorwaardelijk":"structureel"; }
 function sorteerSleutel(x){ const g=groep(x); return GROEP_RANG[g]*1000+(g==="essentieel"?ESSENTIEEL.get(x.subkop):kopVolgorde(x.subkop)); }
+function heeftCaoRef(d){
+  if(!d.cao||!d.cao.van_toepassing) return false;
+  if(d.meta&&d.meta.cao_referentie===false) return false;
+  if(d.meta&&d.meta.bron_type==="uitvraag_scenario2") return true;
+  const docs=(d.meta&&d.meta.documenten)||[];
+  if(Array.isArray(d.meta&&d.meta.documenten)) return d.conform_cao.length>0 || docs.length>1;
+  return true;
+}
+function standaardKeuze(c,d){
+  if(groep(c)==="voorwaardelijk") return "pergeval";
+  if(c.signaal==="mogelijk_onder_cao" && heeftCaoRef(d)) return "cao";
+  return "";
+}
 function normaliseer(d){
   for(const x of [...d.uitzonderingen,...d.te_controleren]){
     if(x.toepassing!=="voorwaardelijk"&&x.toepassing!=="structureel") x.toepassing=VOORW_STD.has(x.subkop)?"voorwaardelijk":"structureel";
@@ -321,6 +335,9 @@ function parseBron(raw){
   const fixKop=(item)=>{ if(KOP_ALIAS[item.subkop]) item.subkop=KOP_ALIAS[item.subkop]; if(!KOP_INDEX.has(item.subkop)){ waarschuwingen.push(`Onbekende subkop “${item.subkop}” is ondergebracht bij “Overig / niet in cao”.`); item.subkop="Overig / niet in cao"; } };
   d.uitzonderingen.forEach(fixKop); d.te_controleren.forEach(fixKop);
   normaliseer(d);
+  if(Array.isArray(d.meta.documenten) && d.meta.documenten.length<=1){
+    for(const c of d.te_controleren) if(c.signaal==="tegenstrijdig") c.signaal="onduidelijk";
+  }
   const oud = d.meta.bron_type==="inlenersbeloning_oud";
   return {data:d,waarschuwingen,oud};
 }
@@ -512,12 +529,12 @@ async function bouwInrichting(L,state){
     p.subkop(e.naam);
     if(its.length){ for(const x of its){ p.punt(x.tekst+label(x)); if(x.voorwaarden) p.tekst(`Voorwaarden: ${x.voorwaarden}`,{size:9,indent:12,color:p.MUTED,na:3}); } }
     else if(openE.length) p.punt("Nog niet beoordeeld.",{color:p.RED});
-    else p.punt(d.cao.van_toepassing?"Geen afwijking: inrichten conform de cao.":"Niet opgegeven door de opdrachtgever.",{color:p.MUTED});
+    else p.punt(heeftCaoRef(d)?"Geen afwijking: inrichten conform de cao.":d.cao.van_toepassing?"Niet genoemd in het formulier.":"Niet opgegeven door de opdrachtgever.",{color:p.MUTED});
   }
 
   p.kop("2. Structureel toepassen");
   const struct=items.filter(x=>x.groep==="structureel");
-  if(!struct.length) p.tekst(d.cao.van_toepassing?"Geen overige afwijkingen: inrichten conform de cao.":"Geen overige afspraken.",{color:p.MUTED});
+  if(!struct.length) p.tekst(heeftCaoRef(d)?"Geen overige afwijkingen: inrichten conform de cao.":"Geen overige afspraken.",{color:p.MUTED});
   for(const h of HOOFDSTUKKEN){
     const hs=struct.filter(x=>hoofdstukVan(x.subkop)===h).sort((a,b)=>kopVolgorde(a.subkop)-kopVolgorde(b.subkop));
     if(!hs.length) continue;
@@ -533,8 +550,13 @@ async function bouwInrichting(L,state){
   const voorw=items.filter(x=>x.groep==="voorwaardelijk").sort((a,b)=>kopVolgorde(a.subkop)-kopVolgorde(b.subkop));
   if(voorw.length){
     p.kop("3. Alleen onder voorwaarden");
-    p.tekst("Deze regelingen gelden alleen als aan een voorwaarde is voldaan. De voorwaarden staan in de bijlage.",{size:9,color:p.MUTED,na:6});
-    for(const x of voorw) p.punt(`${x.subkop}: ${x.tekst}`);
+    p.tekst("Deze regelingen gelden alleen als aan een voorwaarde is voldaan.",{size:9,color:p.MUTED,na:6});
+    let vorigeV=null;
+    for(const x of voorw){
+      if(x.subkop!==vorigeV){ p.subkop(x.subkop); vorigeV=x.subkop; }
+      p.punt(x.tekst+label(x));
+      if(x.voorwaarden) p.tekst(`Voorwaarden: ${x.voorwaarden}`,{size:9,indent:12,color:p.MUTED,na:3});
+    }
   }
   if(v.vervallen.length){
     p.kop("Vervallen controlepunten");
@@ -551,15 +573,6 @@ async function bouwInrichting(L,state){
   if(d.ontbrekend.length){
     p.kop("Niet in het formulier");
     p.tekst(d.ontbrekend.join(", "),{color:p.MUTED});
-  }
-  if(voorw.length){
-    p.kop("Bijlage: voorwaarden");
-    for(const x of voorw){
-      p.subkop(x.subkop);
-      p.tekst(x.tekst,{size:9,na:2});
-      p.tekst(x.voorwaarden?`Voorwaarden: ${x.voorwaarden}`:"Geen voorwaarden vastgelegd.",{size:9,color:p.MUTED,na:2});
-      if(x.bron) p.tekst(`Bron: ${x.bron}`,{size:8,color:p.MUTED,na:6});
-    }
   }
   p.afronden();
   return p.doc.save();
@@ -699,16 +712,15 @@ function laadTekst(tekst){
   try{ r=parseBron(tekst); }
   catch(e){ msg("#m1","err",`Dit bestand kan niet worden gelezen. Gebruik het bestand dat de beloningsassistent heeft gemaakt. (${esc(e.message)})`); return; }
   if(r.fouten){ msg("#m1","err",r.fouten.map(esc).join("<br>")); return; }
-  if(r.oud){
-    state=null; zetStap("#s2",false); zetStap("#s3",false);
-    msg("#m1","err","Dit is een oud inlenersbeloningsformulier (vóór 2026). Dat is niet genoeg om opnieuw te laten tekenen. Geldt er een cao? Kies dan ‘Alleen een cao’. Heeft de opdrachtgever een eigen loongebouw? Laat dan de standaard uitvraag op wijzerbelonen.nl invullen.");
-    return;
-  }
+  { const dd=r.data, docs=(dd.meta.documenten||[]).join(" ");
+    const zonderRef = dd.meta.cao_referentie===false || (dd.cao.van_toepassing && !dd.conform_cao.length && !/caoloon/i.test(docs) && (dd.meta.documenten||[]).length<=1);
+    if(zonderRef) r.waarschuwingen.push(`Er geldt een cao (${dd.cao.naam||"naam onbekend"}), maar er is geen cao of Caoloon-uitdraai meegegeven. Daardoor kan niets als ‘conform cao’ worden herkend. Draai de Caoloon-uitdraai en haal het formulier samen met de uitdraai opnieuw door de assistent.`); }
+  if(r.oud) r.waarschuwingen.push("Dit formulier is gemarkeerd als oud inlenersbeloningsformulier. Controleer of alle arbeidsvoorwaarden erin staan.");
   const d=r.data;
   state={
     scenario:1, data:d,
     uitz:d.uitzonderingen.map(u=>({...u})),
-    ctrl:d.te_controleren.map(c=>({...c,keuze:c.signaal==="mogelijk_onder_cao"?"cao":"",tekst:""})),
+    ctrl:d.te_controleren.map(c=>({...c,keuze:standaardKeuze(c,d),tekst:""})),
     functies:d.functies.map(f=>({...f})),
     uitlener:UITLENERS[0], intercedent:"", peildatum:vandaag()
   };
@@ -771,7 +783,7 @@ $("#b_upload").onchange=async e=>{
   const r=await leesUitvraag(PDFLib,new Uint8Array(await f.arrayBuffer()));
   if(r.fout){ msg("#mb2","err",esc(r.fout)); return; }
   const d=r.data;
-  state={scenario:2,data:d,uitz:d.uitzonderingen.map(u=>({...u})),ctrl:d.te_controleren.map(c=>({...c,keuze:"",tekst:""})),functies:d.functies.map(x=>({...x})),uitlener:r.inv.uitlener,intercedent:r.inv.intercedent,peildatum:r.inv.peildatum};
+  state={scenario:2,data:d,uitz:d.uitzonderingen.map(u=>({...u})),ctrl:d.te_controleren.map(c=>({...c,keuze:standaardKeuze(c,d),tekst:""})),functies:d.functies.map(x=>({...x})),uitlener:r.inv.uitlener,intercedent:r.inv.intercedent,peildatum:r.inv.peildatum};
   const kern=`Uitvraag van ${esc(d.klant.bedrijfsnaam)} ingelezen: ${d.uitzonderingen.length} afwijking(en), ${d.te_controleren.length} controlepunt(en).`+(!d.uitzonderingen.length&&!d.te_controleren.length?" De opdrachtgever geeft niets meer dan de cao.":"");
   msg("#mb2",r.waarschuwingen.length?"warn":"ok",[kern,...r.waarschuwingen.map(esc)].join("<br>"));
   zetStap("#s2",true); zetStap("#s3",true); render();
@@ -818,14 +830,16 @@ function renderControles(){
   if(!state.ctrl.length){ $("#controles").innerHTML=`<div class="msg ok">Geen controlepunten. Ga door naar de documenten.</div>`; return; }
   const volgorde=state.ctrl.map((c,i)=>i).sort((a,b)=>sorteerSleutel(state.ctrl[a])-sorteerSleutel(state.ctrl[b]));
   let vorigeGroep=null;
-  $("#controles").innerHTML=`<h3 style="margin:24px 0 4px">Controlepunten</h3><p class="hint">Begin bij de essentiële punten. Zijn die beoordeeld, dan kun je het inrichtingsdocument al downloaden.</p>`+volgorde.map(i=>{
+  $("#controles").innerHTML=`<h3 style="margin:24px 0 4px">Controlepunten</h3><p class="hint">Begin bij de essentiële punten. Zijn die beoordeeld, dan kun je het inrichtingsdocument al downloaden. Punten ‘alleen onder voorwaarden’ staan standaard op ‘per geval bepalen door de backoffice’.</p>`+volgorde.map(i=>{
     const c=state.ctrl[i];
     const g=groep(c);
     let kopHtml="";
     if(g!==vorigeGroep){ vorigeGroep=g; const n=state.ctrl.filter(x=>groep(x)===g).length, o=state.ctrl.filter(x=>groep(x)===g&&!controleGeldig(x)).length; kopHtml=`<h4 class="grp grp-${g}">${esc(GROEP_LABEL[g])} <span>${n} punt(en), ${o} open</span></h4>`; }
     const toepHtml=g==="essentieel"?`<span class="pill pill-ess">Essentieel</span>`:`<select class="toep" data-ctoep="${i}" aria-label="Toepassing"><option value="structureel"${c.toepassing!=="voorwaardelijk"?" selected":""}>Structureel</option><option value="voorwaardelijk"${c.toepassing==="voorwaardelijk"?" selected":""}>Alleen onder voorwaarden</option></select>`;
     const s=SIGNAAL[c.signaal]||{label:c.signaal,cls:"s-ondu"};
-    const keuzes=c.signaal==="voorwaarde_toetsen"?KEUZES_VOORW:KEUZES;
+    const ref=heeftCaoRef(state.data);
+    let keuzes=c.signaal==="voorwaarde_toetsen"?KEUZES_VOORW:KEUZES.filter(([k])=>ref||k!=="cao");
+    if(groep(c)==="voorwaardelijk" && !keuzes.some(([k])=>k==="pergeval")) keuzes=[["pergeval","Per geval bepalen door de backoffice"],...keuzes];
     const vergelijk=(c.bronnen||[]).filter(b=>b.tekst).length>=2
       ? `<div class="compare">${c.bronnen.filter(b=>b.tekst).map(b=>`<div><span>${esc(b.document||"Bron")}${b.vindplaats?", "+esc(b.vindplaats):""}</span>${esc(b.tekst)}</div>`).join("")}</div>`
       : `<div class="compare"><div><span>In het formulier</span>${esc(c.waarde_in_bron)}</div><div><span>Volgens de cao</span>${esc(c.waarde_cao||"—")}</div></div>`;
@@ -842,7 +856,10 @@ function renderControles(){
     const i=+e.target.closest(".ctrl").dataset.i; state.ctrl[i].keuze=e.target.value; renderControles(); renderKnoppen(); updateTeller();
     document.querySelector(`.ctrl[data-i="${i}"] input[value="${e.target.value}"]`)?.focus();
   });
-  document.querySelectorAll("[data-ctoep]").forEach(sel=>sel.onchange=e=>{ state.ctrl[+e.target.dataset.ctoep].toepassing=e.target.value; renderControles(); renderKnoppen(); updateTeller(); });
+  document.querySelectorAll("[data-ctoep]").forEach(sel=>sel.onchange=e=>{ const c=state.ctrl[+e.target.dataset.ctoep]; c.toepassing=e.target.value;
+    if(c.toepassing==="voorwaardelijk" && !c.keuze) c.keuze="pergeval";
+    if(c.toepassing==="structureel" && c.keuze==="pergeval" && c.signaal!=="voorwaarde_toetsen") c.keuze="";
+    renderControles(); renderKnoppen(); updateTeller(); });
   document.querySelectorAll("[data-tekst]").forEach(t=>t.oninput=e=>{
     const i=+e.target.dataset.tekst; state.ctrl[i].tekst=e.target.value;
     e.target.closest(".ctrl").classList.toggle("done",controleGeldig(state.ctrl[i])); renderKnoppen(); updateTeller();

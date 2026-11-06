@@ -1,0 +1,9 @@
+{"meta":{"schema_versie":"1.2","bron_type":"sugb","bron_naam":"Standaard uitvraag Gelijkwaardige Beloning","bron_datum":"2026-10-01","peildatum":null,"documenten":["SUGB voorbeeld"],"cao_referentie":false},
+"klant":{"bedrijfsnaam":"Voorbeeld Logistiek BV","kvk_nummer":null,"vestigingsplaats":null,"contactpersoon_naam":null,"contactpersoon_email":null},
+"cao":{"van_toepassing":true,"naam":"Voorbeeld-cao","looptijd_van":null,"looptijd_tot":null,"eigen_regeling_naast_cao":true},
+"cao_keuzes":{},"functies":[],"conform_cao":[],
+"uitzonderingen":[{"subkop":"Reiskostenvergoeding","afspraak":"€ 0,23 per km woon-werk.","voorwaarden":null,"bronnen":[{"document":"SUGB voorbeeld","vindplaats":"p. 13"}]}],
+"te_controleren":[
+ {"subkop":"Overwerktoeslag","signaal":"tegenstrijdig","waarde_in_bron":"p. 11 en p. 15 noemen andere compensatie","waarde_cao":null,"reden":"Formulier spreekt zichzelf tegen.","bronnen":[]},
+ {"subkop":"Jubileum uitkeringen","signaal":"onduidelijk","waarde_in_bron":"Jubileum, bedrag onbekend","waarde_cao":null,"reden":"Bedrag ontbreekt.","bronnen":[]}],
+"ontbrekend":[]}
