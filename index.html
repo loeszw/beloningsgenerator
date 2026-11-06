@@ -857,14 +857,14 @@ function renderControles(){
     if(bo.length>=2 && c.signaal!=="voorwaarde_toetsen"){
       keuzes=[
         ...bo.map(({b,i})=>[`bronidx:${i}`,`Klopt: ${kortDoc(b.document)}`]),
-        ...(ref?[["cao","Cao geldt (Caoloon-uitdraai)"]]:[]),
+        ...(ref&&/caoloon/i.test((state.data.meta.documenten||[]).join(" "))?[["cao","Cao geldt (Caoloon-uitdraai)"]]:[]),
         ["correctie","Combinatie of anders: zelf invullen wat geldt"],
         ["vervalt","Niet van toepassing, vervalt"]
       ];
     }
     if(groep(c)==="voorwaardelijk" && !keuzes.some(([k])=>k==="pergeval")) keuzes=[["pergeval","Per geval bepalen door de backoffice"],...keuzes];
     const vergelijk=(c.bronnen||[]).filter(b=>b.tekst).length>=2
-      ? `<div class="compare">${c.bronnen.filter(b=>b.tekst).map(b=>`<div><span>${esc(b.document||"Bron")}${b.vindplaats?", "+esc(b.vindplaats):""}</span>${esc(b.tekst)}</div>`).join("")}</div>`
+      ? `<div class="compare">${c.bronnen.filter(b=>b.tekst).map(b=>`<div><span>${esc(kortDoc(b.document))}${b.vindplaats?", "+esc(b.vindplaats):""}</span>${esc(b.tekst)}</div>`).join("")}</div>`
       : `<div class="compare"><div><span>In het formulier</span>${esc(c.waarde_in_bron)}</div><div><span>Volgens de cao</span>${esc(c.waarde_cao||"—")}</div></div>`;
     const tekstLabel=String(c.keuze).startsWith("bronidx:")?"Wat geldt (overgenomen uit de gekozen bron; pas aan als nodig)":c.keuze==="correctie"?"Wat geldt volgens de opdrachtgever (komt in de aanvulling)":c.keuze==="bron"&&c.signaal==="mogelijk_onder_cao"?"Waarom is dit niet lager dan de cao? (verplicht)":"Antwoord of toelichting (optioneel)";
     return kopHtml+`<article class="ctrl ${s.cls} ${controleGeldig(c)?"done":""}" data-i="${i}">
