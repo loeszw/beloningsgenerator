@@ -1,0 +1,330 @@
+{
+  "schema_versie": "1.2",
+  "toelichting": "Gedeeld veldschema voor (1) de beloningsassistent in ChatGPT die formulieren en regelingen omzet en (2) de beloningsgenerator. Veldnamen nooit wijzigen zonder schema_versie op te hogen.",
+  "velden": {
+    "meta": {
+      "schema_versie": "string, altijd '1.2'",
+      "bron_type": "enum: 'sugb' | 'gelijkwaardige_beloning_overig' | 'inlenersbeloning_oud' | 'beloningsregister' | 'onbekend'",
+      "bron_naam": "string | null — naam van tool of uitlener waar het formulier vandaan komt, bijv. 'wijzerbelonen.nl'",
+      "bron_datum": "string YYYY-MM-DD | null — datum waarop het bronformulier is ingevuld of ondertekend",
+      "peildatum": "string YYYY-MM-DD | null — vult de intercedent in de generator in",
+      "documenten": "array van strings: namen van alle aangeleverde documenten"
+    },
+    "klant": {
+      "bedrijfsnaam": "string | null",
+      "kvk_nummer": "string | null — alleen cijfers",
+      "vestigingsplaats": "string | null",
+      "contactpersoon_naam": "string | null",
+      "contactpersoon_email": "string | null"
+    },
+    "cao": {
+      "van_toepassing": "boolean | null",
+      "naam": "string | null — zoals genoemd in het bronformulier",
+      "looptijd_van": "string YYYY-MM-DD | null",
+      "looptijd_tot": "string YYYY-MM-DD | null",
+      "eigen_regeling_naast_cao": "boolean | null — true als de klant naast de cao eigen regelingen heeft"
+    },
+    "cao_keuzes": {
+      "uren_per_week": "number | null",
+      "loontabel": "enum: 'maand' | '4-weken' | null",
+      "dagvenster": "string | null — bijv. '06.00-18.00'",
+      "ploegendienst": "boolean | null",
+      "overwerk_inbegrepen_in_salaris": "boolean | null"
+    },
+    "functies": [
+      {
+        "functienaam": "string",
+        "schaal_of_functiegroep": "string | null",
+        "opmerking": "string | null"
+      }
+    ],
+    "uitzonderingen": [
+      {
+        "subkop": "string: exact één kop uit caoloon_koppen[].kop (niet 'Vakantie')",
+        "afspraak": "string: wat de opdrachtgever afwijkend of extra geeft, max. 25 woorden",
+        "voorwaarden": "string | null: wanneer de afspraak geldt; nooit weglaten als een bron voorwaarden noemt",
+        "bronnen": [
+          {
+            "document": "string",
+            "vindplaats": "string | null, bijv. 'p. 13' of 'art. 6.2'"
+          }
+        ],
+        "toepassing": "enum: 'structureel' | 'voorwaardelijk'; optioneel, generator vult standaard per kop in"
+      }
+    ],
+    "conform_cao": "array van strings — subkoppen waarvan de bron gelijk is aan de Caoloon-uitdraai (alleen voor audit, komt niet als afwijking in het document)",
+    "te_controleren": [
+      {
+        "subkop": "string",
+        "signaal": "enum: 'mogelijk_onder_cao' | 'tegenstrijdig' | 'onduidelijk' | 'bijlage_ontbreekt' | 'voorwaarde_toetsen'",
+        "waarde_in_bron": "string",
+        "waarde_cao": "string | null",
+        "reden": "string, max. 20 woorden",
+        "bronnen": [
+          {
+            "document": "string",
+            "vindplaats": "string | null",
+            "tekst": "string: wat déze bron zegt, max. 30 woorden"
+          }
+        ],
+        "toepassing": "enum: 'structureel' | 'voorwaardelijk'; optioneel"
+      }
+    ],
+    "ontbrekend": "array van strings — veldpaden die niet in de bron stonden, bijv. 'klant.kvk_nummer'"
+  },
+  "caoloon_koppen": [
+    {
+      "hoofdstuk": "Loon",
+      "kop": "Loon"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Eindejaarsuitkering"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Eenmalige uitkeringen"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Wachtdagen ziekteverzuim"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Ziektetermijnen"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Loondoorbetaling bij ziekte"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Vakantiebijslag"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Bijzonderheden vakantiebijslag"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Aankomende structurele verhogingen"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Individueel keuze budget (IKB)"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Vaste uitkeringen"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Jubileum uitkeringen"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Variabele uitkeringen"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Pensioen"
+    },
+    {
+      "hoofdstuk": "Algemeen",
+      "kop": "Pensioenregelingen"
+    },
+    {
+      "hoofdstuk": "Verlof",
+      "kop": "Vakantie"
+    },
+    {
+      "hoofdstuk": "Verlof",
+      "kop": "Feestdagen"
+    },
+    {
+      "hoofdstuk": "Verlof",
+      "kop": "Waardebepaling verlofdag"
+    },
+    {
+      "hoofdstuk": "Verlof",
+      "kop": "Vakantiedagen"
+    },
+    {
+      "hoofdstuk": "Verlof",
+      "kop": "Verplicht verlof"
+    },
+    {
+      "hoofdstuk": "Verlof",
+      "kop": "Bijzonder verlof"
+    },
+    {
+      "hoofdstuk": "Verlof",
+      "kop": "Aanvulling wazo verlof"
+    },
+    {
+      "hoofdstuk": "Loontabellen",
+      "kop": "Periodiek verhogingen bijzonderheden"
+    },
+    {
+      "hoofdstuk": "Loontabellen",
+      "kop": "ADV/ATV regeling bijzonderheden"
+    },
+    {
+      "hoofdstuk": "Loontabellen",
+      "kop": "Initiële inschaling"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Bij samenloop van toeslagen"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Overwerktoeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Onregelmatigheidstoeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Verschoven diensten toeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Ploegentoeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Afbouwregeling"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Waarnemingstoeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Koudetoeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Vuilwerktoeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Gevaarlijke stoffen regeling"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Standby/consignatie toeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Performancetoeslag"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Thuiswerkvergoeding"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Reiskostenvergoeding"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Verplichte opleidingen"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Reistijdvergoeding"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Standbyvergoeding"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Zorgverzekeringvergoeding"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Mobiliteitsvergoeding"
+    },
+    {
+      "hoofdstuk": "Toeslagen/Vergoedingen",
+      "kop": "Overige kosten vergoeding"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Doorbetaling pauzes"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Onwerkbaar weer vergoeding"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Duurzame inzetbaarheid"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Vitaliteit en gezondheid"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Duurzame samenleving"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Aanvullende sociale verzekeringen"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Overige arbeidsvoorwaarden"
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Tijd voor tijd",
+      "niet_in_caoloon": true
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Verzekeringen",
+      "niet_in_caoloon": true
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Uurloonberekening en afwijkende roosters",
+      "niet_in_caoloon": true
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "RVU en generatiepact",
+      "niet_in_caoloon": true
+    },
+    {
+      "hoofdstuk": "Overig",
+      "kop": "Overig / niet in cao"
+    }
+  ],
+  "matching_regels_generator": [
+    "Zoek een kop als volledige, losstaande regel in de tekst van de Caoloon-PDF; nooit als deel van een langere regel ('Vakantie' mag niet matchen op 'Vakantiebijslag' of 'Vakantiedagen').",
+    "Een onderdeel loopt tot de volgende kop uit caoloon_koppen; voeg de pagina 'Afwijking klant' in na de laatste pagina van dat onderdeel.",
+    "'Overig / niet in cao' en koppen die niet gevonden worden komen op de pagina 'Overige afspraken' achteraan, met een waarschuwing voor de intercedent.",
+    "Gebaseerd op een Caoloon-uitdraai van 28-10-2026 (cao M&T); controleer de lijst bij een nieuwe cao in de pilot.",
+    "Koppen met niet_in_caoloon=true staan niet in de Caoloon-uitdraai en komen op de pagina 'Overige afspraken'.",
+    "'Vakantie' wordt bij inlezen omgezet naar 'Vakantiedagen'."
+  ],
+  "essentiele_elementen": [
+    "Vakantiedagen",
+    "Vakantiegeld",
+    "Pensioen(compensatie)",
+    "Reiskosten",
+    "Loondoorbetaling bij ziekte",
+    "Wachtdagen",
+    "Eindejaarsuitkering",
+    "Eenmalige uitkering",
+    "Bruto vergoedingen en netto onkosten",
+    "ADV",
+    "Feestdagen"
+  ]
+}
