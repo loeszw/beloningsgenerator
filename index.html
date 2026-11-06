@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Beloningsgenerator</title>
+<title>Arbeidsvoorwaarden opdrachtgever – IU Groep</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
@@ -140,7 +140,7 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
 </style>
 </head>
 <body data-mode="1">
-<header class="band"><div class="band-in"><img class="logo" id="logo" alt="IU Groep" width="148" height="40"><h1 class="sr-only">Beloningsgenerator</h1></div></header>
+<header class="band"><div class="band-in"><img class="logo" id="logo" alt="IU Groep" width="148" height="40"><h1 class="sr-only">Arbeidsvoorwaarden opdrachtgever</h1></div></header>
 <main>
   <p class="lead">Leg de arbeidsvoorwaarden van de opdrachtgever vast en maak de documenten voor de backoffice en HelloFlex. Alles blijft in deze browser; er wordt niets opgeslagen of verstuurd.</p>
 
@@ -671,7 +671,7 @@ async function leesUitvraag(L,bytes){
   try{ doc=await L.PDFDocument.load(bytes,{ignoreEncryption:true}); }catch(e){ return {fout:"Dit bestand kan niet als PDF worden geopend."}; }
   const form=doc.getForm();
   let inv;
-  try{ inv=uitB64(form.getTextField("bg_meta").getText()); }catch(e){ return {fout:"Dit is geen uitvraag uit de beloningsgenerator. Gebruik voor een eigen formulier van de opdrachtgever de route ‘Formulier van de opdrachtgever’."}; }
+  try{ inv=uitB64(form.getTextField("bg_meta").getText()); }catch(e){ return {fout:"Dit is geen uitvraag uit deze tool. Gebruik voor een eigen formulier van de opdrachtgever de route ‘Formulier van de opdrachtgever’."}; }
   const txt=n=>{try{return (form.getTextField(n).getText()||"").trim()}catch(e){return ""}};
   const chk=n=>{try{return form.getCheckBox(n).isChecked()}catch(e){return false}};
   const uitz=[], ctrl=[];
