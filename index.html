@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Beloningsgenerator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F2F2F2; --surface:#FFFFFF; --ink:#000000; --muted:#5C5C5C; --line:#D6D6D6;
+  --accent:#E8492A; --accent-soft:#FDE8E3; --on-accent:#FFFFFF;
+  --btn:#000000; --btn-ink:#FFFFFF; --band:#000000; --band-ink:#FFFFFF;
+  --onder:#A3160B; --onder-soft:#FBE4E1;
+  --tegen:#8A5300; --tegen-soft:#FBEFD9;
+  --ondu:#4A4A4A; --ondu-soft:#ECECEC;
+  --bijl:#5B3FB0; --bijl-soft:#EFEAFB; --voorw:#1D5FA8; --voorw-soft:#E3EEFA;
+  --ok:#1F7A4D;
+  box-sizing:border-box;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#000000; --surface:#161616; --ink:#FFFFFF; --muted:#A6A6A6; --line:#2E2E2E;
+    --accent:#F0603F; --accent-soft:#3A1810; --on-accent:#FFFFFF;
+    --btn:#FFFFFF; --btn-ink:#000000; --band:#161616; --band-ink:#FFFFFF;
+    --onder:#F58A7E; --onder-soft:#3A1715; --tegen:#E9AE5A; --tegen-soft:#3A2B17;
+    --ondu:#BDBDBD; --ondu-soft:#242424; --bijl:#B9A5F2; --bijl-soft:#2A2340; --voorw:#8DBBF0; --voorw-soft:#182A40; --ok:#6BCB98;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#000000; --surface:#161616; --ink:#FFFFFF; --muted:#A6A6A6; --line:#2E2E2E;
+  --accent:#F0603F; --accent-soft:#3A1810; --on-accent:#FFFFFF;
+  --btn:#FFFFFF; --btn-ink:#000000; --band:#161616; --band-ink:#FFFFFF;
+  --onder:#F58A7E; --onder-soft:#3A1715; --tegen:#E9AE5A; --tegen-soft:#3A2B17;
+  --ondu:#BDBDBD; --ondu-soft:#242424; --bijl:#B9A5F2; --bijl-soft:#2A2340; --voorw:#8DBBF0; --voorw-soft:#182A40; --ok:#6BCB98;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Barlow",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+h1,h2,.step-nr,.modes button{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
+.band{background:var(--band);color:var(--band-ink);padding:calc(28px + env(safe-area-inset-top,0px)) 0 30px}
+.band-in{max-width:920px;margin:0 auto;padding:0 20px}
+.logo{display:block;height:40px;width:auto;margin:0 0 14px}
+.band h1 span{color:var(--accent)}
+main{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:clamp(2.4rem,6vw,3.6rem);line-height:1;margin:0;font-weight:800}
+.lead{color:var(--muted);margin:0 0 36px;max-width:62ch}
+.step{display:grid;grid-template-columns:44px 1fr;gap:0 16px;margin-bottom:40px}
+.step-nr{width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:1.25rem}
+.step.locked .step-nr{background:var(--line);color:var(--muted)}
+.step.locked .step-body{opacity:.55;pointer-events:none}
+h2{font-size:1.6rem;line-height:1.1;margin:4px 0 6px;font-weight:700}
+.hint{color:var(--muted);margin:0 0 14px;font-size:.95rem;max-width:66ch}
+textarea,input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+textarea{resize:vertical}
+#bron{min-height:180px;font-size:.85rem;font-family:ui-monospace,Consolas,monospace}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input[type=radio],input[type=checkbox]{accent-color:var(--accent)}
+button{font:inherit;font-weight:600;border-radius:6px;padding:10px 18px;border:2px solid var(--btn);background:var(--btn);color:var(--btn-ink);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--accent)}
+button.secondary{background:transparent;color:var(--ink)}
+button.small{padding:4px 10px;font-size:.85rem;font-weight:500}
+button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.msg{border-radius:6px;padding:12px 14px;margin-top:14px;font-size:.95rem}
+.msg.err{background:var(--onder-soft);color:var(--onder)}
+.msg.warn{background:var(--tegen-soft);color:var(--tegen)}
+.msg.ok{background:var(--accent-soft);color:var(--ink)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 24px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.facts dt{color:var(--muted);font-size:.8rem}
+.facts dd{margin:0 0 8px;font-weight:500;overflow-wrap:anywhere}
+.tally{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 4px;font-size:.95rem}
+.tally b{font-size:1.15rem}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label.f{display:block;font-size:.85rem;color:var(--muted)}
+label.f input,label.f select{margin-top:4px}
+.ctrl{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--sig);border-radius:8px;padding:14px 16px;margin-bottom:12px}
+.ctrl.done{border-color:var(--line);border-left-color:var(--ok)}
+.ctrl-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.ctrl-head h3{margin:0;font-size:1.05rem}
+.pill{font-size:.78rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sig-soft);color:var(--sig);white-space:nowrap}
+.s-onder{--sig:var(--onder);--sig-soft:var(--onder-soft)}
+.s-tegen{--sig:var(--tegen);--sig-soft:var(--tegen-soft)}
+.s-ondu{--sig:var(--ondu);--sig-soft:var(--ondu-soft)}
+.s-bijl{--sig:var(--bijl);--sig-soft:var(--bijl-soft)}
+.s-voorw{--sig:var(--voorw);--sig-soft:var(--voorw-soft)}
+.drop{display:block;width:100%;margin:4px 0 12px;border:2px dashed var(--line);border-radius:8px;padding:26px 18px;text-align:center;background:var(--surface);cursor:pointer}
+.drop:hover{border-color:var(--accent)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop strong{display:block;font-size:1.05rem}
+.drop span{color:var(--muted);font-size:.9rem}
+.uitleg{font-size:.8rem;color:var(--muted);margin-top:4px}
+.grp{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-size:1.2rem;margin:22px 0 10px;padding-bottom:4px;border-bottom:2px solid var(--line)}
+.grp-essentieel{border-bottom-color:var(--accent)}
+.grp span{font-family:"Barlow",Arial,sans-serif;font-size:.85rem;font-weight:400;color:var(--muted);margin-left:6px}
+.ctrl-tags{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill-ess{background:var(--accent);color:var(--on-accent)}
+select.toep{width:auto;padding:2px 6px;font-size:.8rem}
+.bronnen{font-size:.8rem;color:var(--muted);margin-top:4px}
+.uitz .voorw{margin-top:2px;min-height:44px;font-size:.88rem}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.compare div{font-size:.9rem;background:var(--bg);border-radius:6px;padding:8px 10px}
+.compare span{display:block;color:var(--muted);font-size:.78rem;margin-bottom:2px}
+.reden{font-size:.9rem;color:var(--muted);margin:0 0 10px}
+.keuzes{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.keuzes label{display:flex;gap:8px;align-items:flex-start;font-size:.93rem;cursor:pointer}
+.keuzes input{width:auto;margin-top:4px}
+.uitz-group h3{font-size:.95rem;color:var(--muted);margin:22px 0 8px;font-weight:600}
+.uitz{display:grid;grid-template-columns:minmax(150px,220px) 1fr auto;gap:8px;align-items:start;margin-bottom:8px}
+.uitz textarea{min-height:60px;font-size:.92rem}
+.uitz select{font-size:.88rem}
+details{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:12px}
+details summary{cursor:pointer;font-weight:600}
+.small-list{font-size:.9rem;color:var(--muted)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 36px}
+.modes button{background:var(--surface);color:var(--ink);border:2px solid var(--line);text-align:left;padding:12px 16px;font-weight:700;font-size:1.3rem;line-height:1.15}
+.modes button small{display:block;font-family:"Barlow",Arial,sans-serif;font-weight:400;color:var(--muted);font-size:.85rem;margin-top:2px}
+.modes button[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+body[data-mode="1"] .mode2,body[data-mode="2"] .mode1{display:none}
+.func-row{display:grid;grid-template-columns:1fr 160px auto;gap:8px;margin-bottom:8px;align-items:end}
+fieldset{border:0;padding:0;margin:0 0 18px}
+legend{font-weight:600;margin-bottom:8px;padding:0}
+@media (max-width:640px){
+  .modes{grid-template-columns:1fr}
+  .func-row{grid-template-columns:1fr}
+  .step{grid-template-columns:1fr}
+  .step-nr{margin-bottom:8px}
+  .compare{grid-template-columns:1fr}
+  .uitz{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body data-mode="1">
+<header class="band"><div class="band-in"><img class="logo" id="logo" alt="IU Groep" width="148" height="40"><h1>Beloning<span>generator</span></h1></div></header>
+<main>
+  <p class="lead">Leg de arbeidsvoorwaarden van de opdrachtgever vast en maak de documenten voor de backoffice en HelloFlex. Alles blijft in deze browser; er wordt niets opgeslagen of verstuurd.</p>
+
+  <div class="modes" role="tablist" aria-label="Kies de situatie">
+    <button role="tab" aria-selected="true" data-mode="1">Formulier van de opdrachtgever<small>De opdrachtgever heeft een formulier ingevuld, of heeft geen cao</small></button>
+    <button role="tab" aria-selected="false" data-mode="2">Alleen een cao<small>Er is nog geen formulier; de cao is de basis</small></button>
+  </div>
+
+  <section class="step mode2" id="b1">
+    <div class="step-nr">1</div>
+    <div class="step-body">
+      <h2>Maak de uitvraag</h2>
+      <p class="hint">Neem de cao over uit de Caoloon-uitdraai. De opdrachtgever vult alleen in wat hij méér geeft dan de cao.</p>
+      <fieldset><legend>Opdrachtgever</legend><div class="fields">
+        <label class="f">Bedrijfsnaam<input id="b_bedrijf" autocomplete="organization"></label>
+        <label class="f">Contactpersoon<input id="b_contact"></label>
+        <label class="f">E-mail contactpersoon<input id="b_email" type="email"></label>
+      </div></fieldset>
+      <fieldset><legend>Uitlener</legend><div class="fields">
+        <label class="f">Uitlener<select id="b_uitlener"></select></label>
+        <label class="f">Intercedent<input id="b_intercedent" autocomplete="name"></label>
+        <label class="f">Peildatum<input id="b_peildatum" type="date"></label>
+      </div></fieldset>
+      <fieldset><legend>Cao uit Caoloon</legend><div class="fields">
+        <label class="f">Cao<input id="b_cao" placeholder="Bijv. M&amp;T technisch installatiebedrijf"></label>
+        <label class="f">Looptijd van<input id="b_van" type="date"></label>
+        <label class="f">Looptijd tot<input id="b_tot" type="date"></label>
+      </div></fieldset>
+      <div class="row"><button id="b_maak">Uitvraag maken</button></div>
+      <div id="mb1"></div>
+    </div>
+  </section>
+
+  <section class="step mode2" id="b2">
+    <div class="step-nr">2</div>
+    <div class="step-body">
+      <h2>Lees de ingevulde uitvraag in</h2>
+      <p class="hint">Stuur de uitvraag naar de opdrachtgever. Krijg je hem ingevuld terug, kies dan hier het bestand.</p>
+      <label class="f">Ingevulde uitvraag (PDF)<input id="b_upload" type="file" accept="application/pdf"></label>
+      <div id="mb2"></div>
+    </div>
+  </section>
+
+  <section class="step mode1" id="s1">
+    <div class="step-nr">1</div>
+    <div class="step-body">
+      <h2>Lees het bestand van de assistent in</h2>
+      <p class="hint">Sleep het bestand dat de beloningsassistent in ChatGPT maakte hierheen, of klik om het te kiezen.</p>
+      <label class="drop" id="drop"><input type="file" id="bestand" accept=".json,.txt,application/json,text/plain" hidden><strong>Sleep het bestand hierheen</strong><span>of klik om een bestand te kiezen</span></label>
+      <details><summary>Of plak de tekst</summary>
+        <textarea id="bron" spellcheck="false" style="margin-top:10px"></textarea>
+        <div class="row"><button id="lees">Tekst inlezen</button></div>
+      </details>
+      <div class="row"><button id="wis" class="secondary">Opnieuw beginnen</button></div>
+      <div id="m1"></div>
+    </div>
+  </section>
+
+  <section class="step locked" id="s2">
+    <div class="step-nr">2</div>
+    <div class="step-body">
+      <h2>Controleer gegevens en controlepunten</h2>
+      <p class="hint">Leg per controlepunt vast wat de opdrachtgever heeft geantwoord. Bij ‘mogelijk onder cao’ staat standaard ‘cao geldt’ geselecteerd.</p>
+      <div id="overzicht"></div>
+      <div id="controles"></div>
+      <div id="uitzonderingen"></div>
+    </div>
+  </section>
+
+  <section class="step locked" id="s3">
+    <div class="step-nr">3</div>
+    <div class="step-body">
+      <h2>Maak de documenten</h2>
+      <p class="hint" id="s3hint">Het inrichtingsdocument is intern. De aanvulling gaat samen met het formulier van de opdrachtgever ter ondertekening naar HelloFlex.</p>
+      <div class="row">
+        <button id="pdfInrichting">Inrichtingsdocument downloaden</button>
+        <button id="pdfAanvulling" class="secondary">Aanvulling downloaden</button>
+      </div>
+      <div id="m3"></div>
+    </div>
+  </section>
+</main>
+
+<script id="core">
+/* ---------- Gedeelde logica (geen DOM) ---------- */
+const LOGO_NORMAAL="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";
+const LOGO_DIAP="iVBORw0KGgoAAAANSUhEUgAAAy8AAADcCAYAAAB5w54aAAAACXBIWXMAAC4jAAAuIwF4pT92AAAgAElEQVR4nO3dT3YaR9fH8fZzMhfvRFORFYiMNBRZgTsrEF6BlRUIrcB4BUYrSGsFhqFGESsITDWJWIHe0/Itp0UDounq7nurvp9zdPwEnCcCiqr61d8PLy8vSV1P6cUwSZK+/GyzzH9Os4fZlucAAAAA4F1HhZen9CIPKan8XJb+wn6LJEmmSZJkp9nDcu/fBAAAAABRKbxIaBknSXJVevI48/z/jxkZAAAAAO85KLw8pRc9CS2fS0/6cZ8kyeg0e3jmEwMAAACwzbvh5Sm9GORLvJIkOSs96ddaAkzGJwUAAABg0/9KjxQ8pRejJEn+biG45E6SJPnrKb0Yl54BAAAAEL2dMy8SXL6VnmjH3Wn2MIr9wwEAAADwn60zLx0Hl9zVU3oxKT0KAAAAIFqlmRfZ4/K3kjfk02n2MC09CgAAACA6b8KLnCr22NIel0P9dpo9PFI0AQAAgLhtLhubKAsuiVxoCQAAACByP8PLU3ox9Hj5pE/nT+nFdewfFAAAABC74syL5oAwliVtAAAAACL1Gl6e0ot+kiQfFb8F+R0wHJ0MAAAARMzNvFhYlkV4AQAAACLmwsvQwFtwLjNEAAAAACL0P9lLcm7kpaelRwAAAABEIZ95GRh6oRZmiAAAAAA04H/GAgHLxgAAAIBIbV5SqZ2V5W0AAAAAPLM28wIAAAAgUtZmXgAAAABEivACAAAAwIQ8vDzzUQEAAADQLg8vj3xKAAAAALSztmxsXnoEAAAAQBTy8DIz9EKXpUcAAAAARMHasjGWuAEAAACR+t9p9pBv2F8YeflZ6REAAAAAUXB7XqYGXuziNHtg2RgAAAAQKUvhZVJ6BAAAAEA0XsOLLB27U/yiV6fZg4WABQAAAKAhxaOSx0mSrJW+0ePSIwAAAACi8jO8yH4SjSFhzqwLAAAAgDeXVJ5mDxNlF0HmM0Gj0qMAAAAAorPthv0032NSerQbKSeMAQAAAEi2hRfZvJ8q2P/y6TR7sHT7PwAAAIAGlcJL8iPA5DfZDzuagVlLcGGfCwAAAICfPry8vOx8N57Si57can9ZerIZK1kq9shHBAAAAKBob3hxntKL/BSym9ITfuX3zFzLsjUAAAAAqB5ekh8Bpi9HKV+VnqwnP91szP4WAAAAAPscHF4cCTHXsqn/rPQXDrOW5WgTlogBAAAAOETl8FL0lF4MZGN//mdffjYDTR5U8oCylD9nBBYAAAAAVdUKLwAAAADQlq1HJQMAAACANoQXAAAAACYQXgAAAACYQHgBAAAAYALhBQAAAIAJhBcAAAAAJhBeAAAAAJhAeAEAAABgAuEFAAAAgAm/8DEBqvWSJBkkSdKXH/fPTv7Y2cYLWCdJ8rjx2Ez+XMpP/vwzH310hvKC3Z+b5WnTrPDPMykzm2UrVu476Qzk/dzGfe8cvn9h6hXKgfteDTde6eWWV77aKB+uvLjv22b5QXxlalcfIP/n841/Z7MPEFx5+vDy8lJ6EEBnhoWfvII6afAXcRXcTP58pIEMhmvgXHnaFnLrWBXKzGwj5IRkUOg4uE7pts7nsVaFjsSy8F0k2OjXS/6rp9uor3Pzje8d9XVY2ixT643621QdTngBupV3ilKpqD4q+CzyzlQmFVlWehaaDaQspVtG4towlzKTGe1U9TYGDnyGlKpWGx0LZrt0SAtlpIvv2KZVoYxkhF6Tuq63i8zU4W/Cy1N6MdqYBlfhNHsYH/t7PKUXm1O2Wl6TypT7lF7kn/+o9IQCdcqBMj2pqK6VNIC7rKUSmx4xKqOxLglxhmAg73XqeWalrpWUm6nyRtCNcI6UfxdXhQ4qgwrtSgs/Tc+s1HVfKCMhBRmNbf9S6rdj9KX911ZvFy2SJJloLUub4WXW8WjTVqfZw4dtjx/iKb1QObVU5zU1ScLed42/m9b3rIKBVFhXZn7j/6ykIpseWJFprEtulTaCVVkJv868EGQ0cAM0I8Udh33WhQ4qQaYZrnM5MhBYtnFlZBLIrJ3Gftx8y36m97h6R10/ew9XlsaaBqI4bQxo3lA6838bDS6JdPK+SOU13rMxGc3pS2ck/wy+GQkuiTTU3xSUnZF8D/9JkuTGaHBJpDOd1yN/Fd5TdSsmjBoWyshno8ElKZSRv+X1pKW/gTaNCvW2peCSFMrSP1KWVKxmIrwAzXEN4XeDFdYuJ9LxI8S0py+zFtY7VGcdlJ2e/LeejXYc3uPe03+kjOw7OQ67uc5lSHW1c1kIuoSYdhVDi9XBkqJL+Y7Muh4wIbwA/vVlmjXEhtAphhgaxGa4jvej4Rm7bU5kSU6T4aVXWOZwYzjwVVEcaVe511OhoXy/Qulc7nMmIYby0byBvM+hlqtLGTCZdDWASXgB/HKdTQ0nh7XhRBrEjFkYr0aBd7wnDa2fjjG0bHKjoxnLyXbqF2bFrSy/9MWVjyl1diPGMogQ6sBl0eeuBjAJL4AfAwktsXaYPjIL40W/MGIXajlaS3jxLfTAV9VHGR1leedbY3lfYuhc7nMl35frPX8Hhyv2AWLSyQAm4QWo71pGWmIbwdvkKrFQjrRu27U0fqF3qq49H705iCDw1XEj5Sr2gYVYO5f7nMhBLDMCbi0j+gA/BzBbWZJIeAGO15PRhi+8h2/cMKpZSbEchd75Xnk+MjmmJRp1nEW+vJMBpv0umTk/2lQGTvCj/frexgAm4QU4jhvtjWVvC5oxiGyPlK8lKn1G0Y/S6uioAgwwHY6Z82p6AR6m4stN0wMlhBegOncEMqN4qMPdOxL6KUfO3NOliiPpNPD9O44bHW1i35EmsQ0M+NJ4xzMQ59RBe31scjki4QWoZiQNP2vrUcd1hHs0fIzoTtnb4s3ngPc6xDYw4FujHU9E41xmer3fP0V4AQ43Ym0rPJhGuIzlTjpDx2KJRjMu5X0N6XLLEQHXi8Y6nojKidT9XssR4QU4DMEFPkwj7YDXmXUZsEysUWfSuQhhszabp/1qpOOJ6HgvR4QX4H0EF/gQa3D5WuNCygHLf1rhNmuPDL+GWL9fTSPAwAev5YjwAuxHcIEPsXas1jVmXVJp7Fj+055vRgMMwaVZBBj44K0cEV6A3Qgu8GESccdqcuSFlCOZCSC4tM9agCG4tIMAAx9OfJxmR3gBthsQXODBSE51itHqyON4GTTonpUAE/PAQBe8dDwRvbO6p9kRXoCyfs2TkYBE7gOKuRM+PmLWhUEDPbQHmJgHBrpUu+MJyAEsR981RXgByjKWq6CmnqcLGa1ayHKeKgYMGqijNcDEPjDQtVodT0BcyZ1nlRFegLcmHMkKD2LfaF61Qerxnqk1UbbPoR/5wIAWV8ZPp4MOX46pXwgvwH9SliHAg3HkAXhecQaF4KLbiaJlQj1mxlX5xgZ+eFB5HxXhBfihd8QyF2BT3pDflB6NS9VZF2Y79TtRsqQv9oEBjWg3UddZ1SP1CS/AD1NG8+BB7MtZ7uQ2/EONOC3KjK73OTAzrtN5jbucAOez7GU7COEF+PGF+cj7gJrGkd8EX/VCygGbfs2p1MHwiJlx3W5YPgYPpocuHyO8ADSKqK/PcrHXILIsPbobs502HdzB8Iiyoh8DEajr7NBlx4QXxO468tFy+BF7w72u+B6wd8GuyuvTa2Jm3IZLTh+DBzcyGLjXL/ueBALXC3St7kIuB3zcc0ngQF7/gBHN2uhcVbuQsn/s2f5Q47Ps72pjEz8z43ZMpFxUvZwWKBq/F4QJL4jZdSAd93vpRDwe2ZnoSwc8lT8JM9XEvll1VXHWZUIZC0Ib979YnxlfS53s6uflnqWVA6mLB1IPX5b+hn4n8pnFXieinispQ7u+K4QXRKtnfPR34XGUaymjm24teyqjHhYbz7ZZ7WT4VOV7FOIs1aLQMU02BhB6hQ7+UDqnoSxTPZd6oqmZEcsz43dSN1c5ffBRfty/4+ria2NLLK+lbWL2pZ55Iew+b5ziWKxXXOgNbRnu3tkXwgtilRod/Z3Ll7qp5RrPhSAzlP9W7J3zfWIfYZxX7KCF8H6tCh3TQ76Hm+9PcabTepBrcpmQtZlxt+/LV8fdal3M7MtxFoV65ZDj5jfrlV6hXrHavynaO/vChn3EylrFmneY/pDKqa3L4mby3/skDTPeYtal2vfI+mxevjzz98KenWO/h26mM+9g/Jokya3h79dJQzPY1mbG76RcVNn7VYWri/+QtkA79rQdLi87v8kMyrjiPVlFzxJoRvL9+UMGlyzb2b4QXhCjobGlG3dSsXV1AeJUGub70jNx2zmlHYn7ih34nQ2RcvcSMtIGBg6W8r70DYeYJjqqIyMjxysJtKOWlkll0hZor4tPqB/fdSf1yqhGYNknk77O74ZDzNWuY9kJL4iRpUr1U4sN4z7P0nn7c8/fiUmPm+Er73WxttfDdUzTXUsXPHqWEGOhY7qpiY6qhZF7N6jU1ky4Y6UuZvZlu4XMtIxaqFeSjVk7i4MjW+sWwgtilBp4zWup4LQdEzqRQBW7rRVqRL5WbHitzbp8ldmQtjumS6mfrC3V9Pn5pgaC7p8KBpW018Xn3LpfcivvSRMzLe/JpE6zNguzNQSzYR+xsbCRbS0jJV1UcIeYSqP9l9Lfrw2hhJd14ZSjYkesLz/b9qisK3ZWd/3/aLSWz7arJZrOVD6TqZFThM487sfT/t36pGhQyf0e30rP6DDa1fmMzLqhZadVPcv3dCJ3NVlwti3wEV4QGwuzLpqDi5NJI6610WyS9WMpF9LpyQ6cPRkWjs8+OeI0JSudF22DBo+FQGChvI08dM56yk9g0xRcnKl07jR2RgkvP5afpsra9Gv5fay036VyxLIxxEZ7ePlkILg400j3wFgIwNvMZQ/HQALIocu+ZtJw9KR8VrmQMjHyfi0klGr77rmR0kXpGX12bq6tQPOsy53i2/6vlS4HOjFcX/qw2DZroMTU0BLwUhkivCAmA+VLxjQ3jrtM5PeOibUlY27juY9lPdOKsy4W9i8s5L3ReqmepQBT6mRUpPW7tTDwvR8p3ScVa3jRXq8khgYgzzb3TxFeEJOh4te6Mjy9fm3k7gEfesaWjN13dCKSo73jslZymt97rASYOp+35u+WhQ748ohZ0TZobnebYqVeSQwNQL75DhJeEBPNlaiVim6b54jWNVtqiO+kwu+yXGnv9FnYX+a4I3I1n0L2scbSMa1l5balI219mCgsH6VR8who2+PynmtrAyOEF8REawU6V3AKSV1ZALf5HsJKeLlTsMxF+zLNP411MJLCUcqaHfsd0fjdWiudzdjlmdmXzt0abM+fDSyLPC8OjBBeEIue4rX3Vm8e3xTK69jHQiOsIbgkyjvZc2Od0qKZ3EOj1bHfEY3lperJehponH2JJbzMDbeDjxK8NPs5AE14QSy0zrosAph1cWYRzL5o3++iaWOx9mWalo0VLx875nPXOEtnbdbFeVZwT9GmWMKL9Xplonz/6s9yRHhBLLSGF2uni70ntNdTZKEB1tR4ar2Y0tIehl007zM7P2Lfi8b6OTO8D1FbPXwiR5GH7Gsg9YrmmSPCC6JT9/6BpmgbIasrtNdTpL3x/apoD4fWwQKro+nbTBWPklb9/LWGF6tmCmfmQt60vw5o2bSJeoUb9hELjaPmiwBGajY9y/G8mm/JPpbm8KKt8dTaUbG4h2GfsdJbsqveKaSxvFxzO7xXg4AHt6ref6Vd/npuFP6OJzIQ/Ux4AboTyl6XTbNAw4vmkUNtS1xYptmOTAKZtv0iVT9/jUsMtS57tCrkfS+hzOY6WsNL4u4tY9kYYqGxMxVqeLF2/OyhtC49TBQ2nhq/b/eBznRqHM2uMksZ+l4I/BDq5zwPsF5ZSn2p0WvbQnhBLDTeNxFaheeEGsq0Nr4rhYGRPQzt0fi6qpzKR3iJg9arCuoK9ZAare346yAi4QXoTqgzFInyW8CPpbXx1djIaBwsILy069BQQniJR4ib9kMdrNNarzDzAqAxIQczbZh1ed8isA21mzTer0R4wSbNS2+PEeKhO85S6aljzLwAHdJ8ERRs0RZeNHZQQh0ddTS+vkPLQWgdWuwWWlANfZBO4+sjvAAdCnW0BtDYGQ39+6YxvBw6Axfy/R94i/Bii8bX97qfjvACALaxbOx9oXcyQl4SB2gVer2idtCH8AJ0g6US8IWO6/tCn3lhjxksCK3dI7x0hPACdKPKUaIA6mGZZvsOnYFjICceoS0RDH3gSO3rI7wAaAInCAHt0nbi2KGhhIEcQCetM0t9wgvQnZA3qoZ6IRkAACHeZWYF4QXoUKizE5weBE003oECwDb2mXWI8IJYaOzAhNrJJ7xAE/ZUAEBACC9Ad4aBvvehvi7YxJ4KAL5d8o52h/CCWGg8begy0FFhwgvQPqvLUNk7AOiktX8yI7wgFlqPSk1Lj9g2YLM+0Alt37tD9wSwdwDQSe0ScMILYqG1gRyVHrHtOrDXgzCwD6t9XJ6K0FGvdITw0pGn9IJ7MNqldeblMqBTx3oBziShOo2d1tA37bNUE2hf6PUKMy8oIby0S/PShHHpEZvyWZeTQF4LjqfxuxZ6595ye8IMDayiXmnf6x45wkt3tCb2kL+MWu97uApg+rnHkjEoFvryDo2vb1Z6ZDv2vMAq6pX2vdYXhJfuaC30WkfwFqVHqtPcSE5Kj9gyZdYFgpmX9rFsDGhf6N87tcdB/1J6BG3RWui1/l4+lhbkI4GfS4/qcCkzFxZDTL7P5WPpUcRK4zKgExkwCnGUv6/0LhvLp43dMyPUCK17T48Vcr2itS/4+l7HEF7mStPj5VN60TvNHtQ09HKIQMjH3B66jKErX+R3tFQR9mXWBShaKOxQjwJd2qj1kIxD2zaNYXcZ0F5ENIt6pV2v9QXLxrqlrXBoPrbXR4f+2dPysybNDG2+zfe5ZCwXwxYaR1hDPQlPY71dZX+hxkElluHhUKHWK1pfVzR7XjSPYmtrdDSHF1+jc1npEV1O5HfUfgRjTzodGperoHsa692zADsaWpeMVQ2vq9Ij3TrnRFAc6CzAsKv5sunXuiWG8KL5GMZ86ZiKQv+UXoyULxnz1RnSHl4SaThnigMMwQXv0TpoFNryDq1Lm6p+/hpn6ph9waFCW2KouZ6MZuZF+z6Hzjdo53tvDGwU99W4PSoc5dvmXH5XbafSEVxwCK3h5TKgTmlfjlnXqOrnr7Gd5uh3HIp6pR0/l/3HEF60n25x/pRedJ3ax9r3LZxmDz47Q1ZO9DqTRl3Lcr6hfJ8ILnjPUvEgQSijpJpfR9UwojHssnQMVYR02bRWP+uJ4MPLafawdDdyKnbzlF50MsIuy8W0Hh/s+L5c0sLSMScPld863gfTk4r5O5vzUYHWWe/LAPa+DBWPjh5TX2stK5w4hkOFUK/0lfcH4wkvQvvSsdxMjipujQQmC7MQvkfllnKOvyUf5fdue1Qklff/pvQMsJ/mendq4FCMfTTX28d87lpPgrxi9gUVWK9XtF978LNuIbzo8XrKVFsBRoLLzMhIehOfn8XLIE/kLhgXYpqsJEfyvv8V+N0/aI7mevfE2Axs0UT50s1j31dmX/xLpa3g8IF2WK5XrjXfqC8rqJh5Uep1k3bTS8ie0ovUUHBJGvr8Zg0sR2vLmYSYf2WkJPUUZNxM3FKWqmmuyKDfUvm9SpcGO6bal/mua8yUa22nrc6+uAuEv8iS3xf5bCZSjrQdBhMKi/XKwMDv/KZ+iCK8yGZv7ftenDxQ/P2UXjSyPEgOB/jLUHBZnGYPTR13HcLN8Ffyef5baJjcSNu+xmkoP2MZKcrf47+lY8RMC3zR/h27UX6/VZGFZb51Rp0zxe20xbZisqWdP5c6/pvU9y/SKSTQ+GWpXulJ+dbeJ3xTt/xSejpcmeINjtt8kRmS8Wn2UHtESu6TmRrsmDY5BTuVjn4op2edcxIYlMlk5Fezb/K7ae6gWlnmW7e+1tpOX0pbYWW58Uj2SR7icsss+1wGwx6l3Gk/tVUjC/WKpasP4pt5ERbXIeYVyven9GImQaay/DSx/N+XaWOLI+pNf26c5Q80R/vSMeeb4pFSK8Fl5Sm8aPXFyMyEjxm6y8IMzT8yMz+TmfqUQwwOprlesRRcFpsBOpqZl9PsId8MvzZ61Oul3Ma/lsr9dSRkc0ZGLpscyI9bFmT5aNuV5/tdtnF7X9jfATRjUhiF1OybdMo0rf1OjSzpSDwFD7d0TOvrnUkZaWopc129hoLuyZYZmnVhZsbN0jBDU/ZNPhdNs3bWLpsuzV7FtGwsMbh0bNOJ/P6vr+EpvSj9hcCUCmxDRjK6BMC/bMf6e41uZPBnpKCDOjZ2RLmvztlU8aEEJ9LpGyoMME0Fl122BZrVxnKzR8VBr01fpMxoqFcG8h2ztMS8NDAS07KxJJAN2jFp6/PKR4tuS48C8OF5W+Oj2EfpdHV1vGxfOn6Wgsvc46i79n0l5/L5aLrPY6BkJP1Mvj83slT9XykXLDPrvl5JZJm8pRmXRO7kK9UtUYUXWWa1Kj0Bjean2UOpwDZobGRtPmCRtaNDz6TzNW254zWWDo61Zaw+P9+lgWPsXYDRsAdmqLxDutzW+YxUsV5pM/y6cPvF4FaCrYPYsc28JEYvJ4xRF5+TlaMNAWvyzsudwd/7SpaUNh1iRvIe3RjsXMwbuKPFQth1Aeaow3Q8cPsovisvM1s7n5G7ku/7uOF6xS0R+9vovt6dh4DEGF6mhu58iVW+UX9rgW1YPuL5Z+xvPtAQyzeVuxCTeeysulOhnmVTr9X7lZr4XK1cInwi92xlLY+kj6S90nxhaSKdT8LLdicyWPFP4bJpH3pSPmYSWizv895ZdqILL3LhIbMvunXZyZnIGksAflmdfSn6KJ3Vl8LRscMDR0/dQQATeS/cpbCWT4RsYtbFsRR2PxZG0psMMW6GzkrYtTxg0SZ32bTbH+gumj6kLA0k+Lglp/9K+bB+gup6X1/9w8vLy89/kPtA1L3g0+zhQ+nBGuRI4aXxRiNU+axL15v7rB0jiMPc1mxMX0qP6OC1fmxYP/CT/dzxsUUhH8P+e4PhJZH/b2vv37pwwp6Po/7Two+lPsvK45IorXVvW1Zb9g2Ffr3D3vY6tqOSX+WzL0/pxcTYaS6x2FlYW/RcmHYl4AL+uJP9Qq17TyK6M+q+4eCSSHvwvfSobsUrDVYb96DsOzq4v/EzNF6WmHXx58zwstJj7J11SWINL2IiU3N0TvXIZ112rnFs2aOMdllrOAHtJjI4EFNjHJq1tJ9Nm0lI+mj0/Tsr3s0WEfa6oI7JnpD/KsYN+69k7wsjA7poO+0rbzg/lR4FUMczJ/uZN96yjKUp1xyyY04bwRZhWh3SN482vCQ/AsyEuz3UuJd7eLSZEmAA7/Lv+lfeVpPmLR96s2Sg0ZT5ruNtgQMcFHyjDi+CEYLutbUE4VgEGMC/MZcGm7PuaNZsYuToZDCriuMdHHyjDy8y2s8IYLfGLd+mfwwCDODXc4cX/OE41x3elj5i+Zh6t9ymjyNVGhiJPryIMcvHOjOX5XsWEGAAv7gY1o67jjdhLxnVV23B8j7UUGkfHeHlv837VIrt62oJQh154/0bI4CAN5MALq8M3UJJXZ1RVlSy2JZDj/uq++gIL+I0e2AEsH0jA8vFtnmUM/iZrQP8GPF9Umsl9Z0WlBV9rj1dyIn4rI4JvoSXAlm+xKhOO25PswfLJ5K4AHNfegbAMRgQ0Gct+5L23rnQgSGHPajR9XJC2HZU/UJ4KbumAW1cfixyCGtj3YZjZuzeuuM7hCM8S6eUJZk6rOXz0Dii7upeykq3FpzYiho+HVu/EF42yP4XGtDmaFk77dNE9sHQYf8R5EYKR2phA/WvDpqDi/NIWemUKyPU9TjG1zozdoSXLQgwjck790N5f0OTN6QDOSoyRgsJcFZOjoNedEq7ZSG4OI/K9uPEguCCOu7qztgRXnaQDfw0oP6sZYN+6JVdvhzu18guVLuV4MaGTfjiBgOYzWyXpeDi5L/rH7TVrbFYRqDHnY/VN4SXPQgw3qxlxiWWym4p5eb3wDeV3ktQ42x/NGHJJv5WWe6UZrTVrSC4oA5ve6QIL+8gwNS2iiy4FM2SJOnLprSQQsxcglnKbcpo2DOn+rViEcDsKW11swguqGPuc6kh4eUABJijvTaIkQaXoqmEmD+MLye7k30tQwlm+/T2PAdU4U6W+sq71oh7+U6HMBDBHVzNILigjjvfe6QILweSDnifSvFg84A35x/LLW34VTpiFmZjFnKC2P/JOtVDG6/z0iNAPdcyi8kgkj+3Su9xqcMFmJj2HTYphFk5dMfLHpdNhJcKCqeQsYRhv6+n2QPBZbeldMT6MpOhLcjMJbD8Ko3WpGLnhlkXNGXKyLoXa5kJDnW/mmurma2rJ6RZOd8YRHnfn01djUF4qSjvkJ9mD1xMuF3+Zf50mj1wadXhHgtB5lcZWb5rMcysJazcyj6WD9JYTWo0WIPSI4A/7iQyOqbHmUt9k1n85Su65iSyo/0Z4KycT5xyt5sbHGns6oRfSo/gIKfZw+QpvZhJA3DGu/bj8kn2t9SylJFld3FTTzppg8L/7knHo0qZc8snnqXCdX8+NtQwaQ0vlM2wXEv9O6UOPshaZlpiu4spkzopLyeXpWexaVFxiXDM3FLwKUulf1q0cZgP4aWGvKP+lF4MpEH4bPaF1Hd7mj1wXK5/z7Ix/r3N8dpoDS+MIIbHneiX1z83sb8Ze9xL2It1+Y87dvtayspJ6W8gkRl42vJqHgsB5qOlX7wBX30dhfwelo3VJMvIriO402Ob11vVCS7YwI3XaJu7HJb9iG+tONb8jYkMrlBO3ppzZ1ct7kTEWA8UcfVMa1sGCC+enGYPs9PsoS8jF6EXXre3hWOQsWmgeAkPZTVsS+lA/M5JUz/qaJmVsjZz27RiOYltwHHTSvYmsCnfj2mE4fhWXl2ZemUAAAZmSURBVHOr9QzhxTOZhejLpuvQrKWg9k+zh2mArw/1NXKyiCcsG4vDTDpjMYaYn3V0Ye8ctgv1EuFDrArhNoaDG9oUSzguzta13rYSXhogS8lG8sGGEGKKoWXMEcjYQ2t4iX2ENUbFEBPiYFKR64z2uupMGDaNKMQsCqGFcNusUMPxXOrUTmfrCC8NOs0eloUQY3E52UqOSyS04BAjxRthWRIRr5mUTVcPh9SRuJOOBJ3R+lyI+SPAGTtXTgaUk9aFEo6LoaXzpagfXl5efv6DHP2r7ijB0+zhQ+lBo57Si5FMKWo+lSKv6LLT7IHpZL/6smG0LxVAaGFwqXi/i49TdF5Kj+gQTP3YoqEEmqHBY5bvZalPxgxLo/qyATk1ehR3SOVEY907P/JwGlf3XJWe0Wct4avOvW+NeBNe0J6n9KInlaKWIPOzomOGxTt3lGuxsjq24tMqb+S/KP79PjHiiB0GhbpY410Na6mbZwSWzgykw6k5yKwLZSS0chJSeHG09QGddaEMqR3AJrwoIEFmWPhpowGduztE8pPSSs/Ch5506q93LKe6U77B/VA9GZXZ9hq1+I3TxnAAVxcPCn+2Xa4XhUtkZ5Rbdfob7XVXYWZdKB8W7wOrIsTwUtRFH7BoUShDJlbcEF6UekovhoUb1Yfy5zEF2q3dnUkH85HjjVsx3hNaikIIMJmBy7lYWoVj9aQuLtbHiXRij+24LmRkfOnq5cKltLClVwi7ffnxGXpXW8rIY2QzcKGHl21cH7BfqH/qlqm1lB1X75gNvYQXg57SC1dB7vLI0q/OjCS4VOnUtHYrbQO0LxdLAlyiB51cuNlmyaERUXLBxtnVdj9vmWEjyP4nxvCyy2YZ2lWmigF3W/kyjfAC+DGUTW3HTvdanIHJf99vpUf1+VM+GwCAPYQXvMFRyUA97tjA7zXXqV4Z21BuJbgkjGACABAOwgtwHHevwnePx4u7ALNr6YkWloLLig3PAACEg/ACVNOTJUj/NHRO+1XhZl6NJoaCS2Ll5BQAAHAYwgtwmJ5sxM833X5u+D07l9mCtPRMd/ryOzX92n3jbhcAAAJCeAHeN5LQctPinQ/5f+cvmTnochmZC23/KL3Abx+WjAEAEBjCC7BbKqHlW4cXMH6U32HccogpzjTdlJ61gVkXAAACw1HJQNlQOu6+NuL7spaZmEmDMwoDubslVX5j/iH+L7KL3AAgRByVjDd+4e0AfnIniGkLLc6JbOi/kiVRs8Jty8eGmUHhdugQAotzR3ABACA8zLwAP0LLuKHTw9q0KNyku6vj7m7j7Rncw1LFr9xoDgBBYOYFbzDzgpj1ZInUdSAzDi6MaJ05assdwQUAgDARXhCrcUChBW+NS48AAIAgcNoYYjUiuATpllkXAADCRXhBrEZ88sFZyUlsAAAgUIQXxCo/pesrn35QrvccVAAAAAJAeEHMxjJaD/vu5Q4cAAAQMMILYvYsd5vAthXLAAEAiAPhBbHL70T5M/Y3wbiU5WIAAMSB8AL82OR9x/tg0icJoAAAIAKEF+CHa7mhHnbkgXPK5wUAQDwIL8AP+bKjIRv4zbhjnwsAAPEhvAD/cRv417wnqs0JLgAAxInwArz1KDMwBBidFpwQBwBAvAgvQBkBRqd8qdiAk8UAAIgX4QXYjgCjC3tcAAAA4QXYIw8wfU4h69yfBBcAAJAQXoB3uVPI7nmrWpfPev0u9/AAAAAQXoADuFPIbnmzWjOX/S2zSF4vAAA4AOEFONxYZgK4C6ZZtzLbtQz5RQIAgOoIL0A1M5kR+Mr75l2+t+g3CYkAAAAlhBegunwZ2TWzMN6sZVP+QA5JAAAA2IrwAhxvJqeR3XKk8tHu5D1kUz4AAHgX4QWobywd8Dvey4Pl79WvcgQyl04CAICDEF4AP56lI/6rdMyZidmuGFrYkA8AACohvAB+LaVj7paTsSfmR5C7JbQAAIC6Pry8vPAmAs1KpdP+MbL3Ob/YM0uSZFp6BgCAw2jsqM7lSH90gPACtKcnQSYNOMjMJbBkzLAAAADfCC9AN3oyapPKn2dGP4eVnLo2k8DC5nsAANAYwgugQ1/uORnKn5dKP5eFBJVH+ZPZFQAA0BrCC6DXoBBq+oWfpmdp1hJOnuXPRwkpXCAJAAA6RXgB7CpuFhzIUrSqHgtLvZbMpAAAALWSJPl/d3tYGKDbsz0AAAAASUVORK5CYII=";
+const b64Bytes=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const KOPPEN = [
+ ["Loon","Loon"],
+ ["Algemeen","Eindejaarsuitkering"],["Algemeen","Eenmalige uitkeringen"],["Algemeen","Wachtdagen ziekteverzuim"],["Algemeen","Ziektetermijnen"],["Algemeen","Loondoorbetaling bij ziekte"],["Algemeen","Vakantiebijslag"],["Algemeen","Bijzonderheden vakantiebijslag"],["Algemeen","Aankomende structurele verhogingen"],["Algemeen","Individueel keuze budget (IKB)"],["Algemeen","Vaste uitkeringen"],["Algemeen","Jubileum uitkeringen"],["Algemeen","Variabele uitkeringen"],["Algemeen","Pensioen"],["Algemeen","Pensioenregelingen"],
+ ["Verlof","Vakantie"],["Verlof","Feestdagen"],["Verlof","Waardebepaling verlofdag"],["Verlof","Vakantiedagen"],["Verlof","Verplicht verlof"],["Verlof","Bijzonder verlof"],["Verlof","Aanvulling wazo verlof"],
+ ["Loontabellen","Periodiek verhogingen bijzonderheden"],["Loontabellen","ADV/ATV regeling bijzonderheden"],["Loontabellen","Initiële inschaling"],
+ ["Toeslagen/Vergoedingen","Bij samenloop van toeslagen"],["Toeslagen/Vergoedingen","Overwerktoeslag"],["Toeslagen/Vergoedingen","Onregelmatigheidstoeslag"],["Toeslagen/Vergoedingen","Verschoven diensten toeslag"],["Toeslagen/Vergoedingen","Ploegentoeslag"],["Toeslagen/Vergoedingen","Afbouwregeling"],["Toeslagen/Vergoedingen","Waarnemingstoeslag"],["Toeslagen/Vergoedingen","Koudetoeslag"],["Toeslagen/Vergoedingen","Vuilwerktoeslag"],["Toeslagen/Vergoedingen","Gevaarlijke stoffen regeling"],["Toeslagen/Vergoedingen","Standby/consignatie toeslag"],["Toeslagen/Vergoedingen","Performancetoeslag"],["Toeslagen/Vergoedingen","Thuiswerkvergoeding"],["Toeslagen/Vergoedingen","Reiskostenvergoeding"],["Toeslagen/Vergoedingen","Verplichte opleidingen"],["Toeslagen/Vergoedingen","Reistijdvergoeding"],["Toeslagen/Vergoedingen","Standbyvergoeding"],["Toeslagen/Vergoedingen","Zorgverzekeringvergoeding"],["Toeslagen/Vergoedingen","Mobiliteitsvergoeding"],["Toeslagen/Vergoedingen","Overige kosten vergoeding"],
+ ["Overig","Doorbetaling pauzes"],["Overig","Onwerkbaar weer vergoeding"],["Overig","Duurzame inzetbaarheid"],["Overig","Vitaliteit en gezondheid"],["Overig","Duurzame samenleving"],["Overig","Aanvullende sociale verzekeringen"],["Overig","Overige arbeidsvoorwaarden"],["Overig","Tijd voor tijd"],["Overig","Verzekeringen"],["Overig","Uurloonberekening en afwijkende roosters"],["Overig","RVU en generatiepact"],["Overig","Overig / niet in cao"]
+];
+const VERBORGEN_KOPPEN=new Set(["Vakantie"]);
+const KOP_ALIAS={"Vakantie":"Vakantiedagen"};
+const UITLEG={
+ "Loon":"Loon boven de cao-schaal, een eigen loontabel of persoonlijke toeslagen.",
+ "Eindejaarsuitkering":"Eindejaarsuitkering en dertiende maand.",
+ "Vaste uitkeringen":"Andere vaste, onvoorwaardelijke uitkeringen; niet de dertiende maand.",
+ "Variabele uitkeringen":"Bonus, winstdeling of prestatie-uitkering.",
+ "Individueel keuze budget (IKB)":"Keuzebudgetten zoals IKB of Benefit Budget, met de opbouw.",
+ "Vakantiedagen":"Wettelijke en extra vakantiedagen, ook naar leeftijd of dienstjaren.",
+ "Verplicht verlof":"Bedrijfssluiting of vastgestelde vrije dagen die verplicht worden opgenomen.",
+ "Overwerktoeslag":"Toeslag voor en grens van overwerk.",
+ "Onregelmatigheidstoeslag":"Toeslag voor avond, nacht, weekend of feestdagen binnen het rooster.",
+ "Standby/consignatie toeslag":"Toeslag over de uren die tijdens een stand-by- of consignatiedienst worden gewerkt.",
+ "Standbyvergoeding":"Vergoeding voor het beschikbaar zijn (stand-by, consignatie, piket).",
+ "Reiskostenvergoeding":"Per kilometer of OV, woon-werk en zakelijk.",
+ "Mobiliteitsvergoeding":"Leaseauto, leasefiets of een vast mobiliteitsbudget.",
+ "Zorgverzekeringvergoeding":"Bijdrage in de (aanvullende) zorgverzekering.",
+ "Verplichte opleidingen":"Scholing die nodig is voor het werk, zoals VCA.",
+ "Duurzame inzetbaarheid":"Vrijwillige ontwikkeling: opleidingsbudget, loopbaancoaching, outplacement.",
+ "Tijd voor tijd":"Overuren of meeruren omzetten in vrije tijd.",
+ "Verzekeringen":"Verzekeringen voor de werknemer, zoals een ongevallenverzekering.",
+ "Uurloonberekening en afwijkende roosters":"Omrekening van maand- naar uurloon en afwijkende arbeidsduur.",
+ "RVU en generatiepact":"Vervroegd uittreden of minder werken richting pensioen.",
+ "Overig / niet in cao":"Alleen als geen andere kop past."
+};
+const ELEMENTEN=[
+ {naam:"Vakantiedagen",koppen:["Vakantiedagen","Vakantie"]},
+ {naam:"Vakantiegeld",koppen:["Vakantiebijslag","Bijzonderheden vakantiebijslag"]},
+ {naam:"Pensioen(compensatie)",koppen:["Pensioen","Pensioenregelingen"]},
+ {naam:"Reiskosten",koppen:["Reiskostenvergoeding"]},
+ {naam:"Loondoorbetaling bij ziekte",koppen:["Loondoorbetaling bij ziekte","Ziektetermijnen"]},
+ {naam:"Wachtdagen",koppen:["Wachtdagen ziekteverzuim"]},
+ {naam:"Eindejaarsuitkering",koppen:["Eindejaarsuitkering"]},
+ {naam:"Eenmalige uitkering",koppen:["Eenmalige uitkeringen"]},
+ {naam:"Bruto vergoedingen en netto onkosten",koppen:["Overige kosten vergoeding","Thuiswerkvergoeding","Zorgverzekeringvergoeding","Mobiliteitsvergoeding"]},
+ {naam:"ADV",koppen:["ADV/ATV regeling bijzonderheden"]},
+ {naam:"Feestdagen",koppen:["Feestdagen"]}
+];
+const ESSENTIEEL=new Map(); ELEMENTEN.forEach((e,i)=>e.koppen.forEach(k=>ESSENTIEEL.set(k,i)));
+const VOORW_STD=new Set(["Jubileum uitkeringen","Variabele uitkeringen","Bijzonder verlof","Aanvulling wazo verlof","RVU en generatiepact","Afbouwregeling","Waarnemingstoeslag","Standby/consignatie toeslag","Standbyvergoeding","Verplichte opleidingen","Duurzame inzetbaarheid","Vitaliteit en gezondheid","Duurzame samenleving","Onwerkbaar weer vergoeding","Verzekeringen","Tijd voor tijd","Gevaarlijke stoffen regeling","Koudetoeslag","Vuilwerktoeslag","Performancetoeslag"]);
+const GROEP_LABEL={essentieel:"Essentieel voor de inrichting",structureel:"Structureel toepassen",voorwaardelijk:"Alleen onder voorwaarden"};
+const GROEP_RANG={essentieel:0,structureel:1,voorwaardelijk:2};
+function groep(x){ if(ESSENTIEEL.has(x.subkop)) return "essentieel"; return x.toepassing==="voorwaardelijk"?"voorwaardelijk":"structureel"; }
+function sorteerSleutel(x){ const g=groep(x); return GROEP_RANG[g]*1000+(g==="essentieel"?ESSENTIEEL.get(x.subkop):kopVolgorde(x.subkop)); }
+function normaliseer(d){
+  for(const x of [...d.uitzonderingen,...d.te_controleren]){
+    if(x.toepassing!=="voorwaardelijk"&&x.toepassing!=="structureel") x.toepassing=VOORW_STD.has(x.subkop)?"voorwaardelijk":"structureel";
+  }
+}
+const HOOFDSTUKKEN = ["Loon","Algemeen","Verlof","Loontabellen","Toeslagen/Vergoedingen","Overig"];
+const KOP_INDEX = new Map(KOPPEN.map(([h,k],i)=>[k,{h,i}]));
+const SIGNAAL = {
+  mogelijk_onder_cao:{label:"Mogelijk onder cao",cls:"s-onder"},
+  tegenstrijdig:{label:"Tegenstrijdig",cls:"s-tegen"},
+  onduidelijk:{label:"Onduidelijk",cls:"s-ondu"},
+  bijlage_ontbreekt:{label:"Bijlage ontbreekt",cls:"s-bijl"},
+  voorwaarde_toetsen:{label:"Voorwaarde toetsen",cls:"s-voorw"}
+};
+
+function nlDatum(iso){
+  if(!iso) return "—";
+  const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m?`${m[3]}-${m[2]}-${m[1]}`:String(iso);
+}
+function hoofdstukVan(kop){return (KOP_INDEX.get(kop)||{h:"Overig"}).h}
+function kopVolgorde(kop){return (KOP_INDEX.get(kop)||{i:999}).i}
+
+function parseBron(raw){
+  const t=String(raw).trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
+  const d=JSON.parse(t);
+  const fouten=[], waarschuwingen=[];
+  for(const k of ["meta","klant","cao","uitzonderingen","te_controleren"]) if(!(k in d)) fouten.push(`Het onderdeel “${k}” ontbreekt.`);
+  if(fouten.length) return {fouten};
+  d.conform_cao ||= []; d.functies ||= []; d.ontbrekend ||= []; d.cao_keuzes ||= {};
+  const v=String(d.meta.schema_versie||"");
+  if(!/^1\.[12]/.test(v)) waarschuwingen.push(`Schemaversie is “${v||"onbekend"}”, verwacht 1.2. Gebruik de nieuwste assistent.`);
+  const bronNaam=d.meta.bron_naam||"bronformulier";
+  for(const u of d.uitzonderingen){
+    u.voorwaarden ||= null;
+    if(!Array.isArray(u.bronnen)) u.bronnen = u.bron_vindplaats?[{document:bronNaam,vindplaats:u.bron_vindplaats}]:[];
+  }
+  for(const c of d.te_controleren){ if(!Array.isArray(c.bronnen)) c.bronnen=[]; }
+  const fixKop=(item)=>{ if(KOP_ALIAS[item.subkop]) item.subkop=KOP_ALIAS[item.subkop]; if(!KOP_INDEX.has(item.subkop)){ waarschuwingen.push(`Onbekende subkop “${item.subkop}” is ondergebracht bij “Overig / niet in cao”.`); item.subkop="Overig / niet in cao"; } };
+  d.uitzonderingen.forEach(fixKop); d.te_controleren.forEach(fixKop);
+  normaliseer(d);
+  const oud = d.meta.bron_type==="inlenersbeloning_oud";
+  return {data:d,waarschuwingen,oud};
+}
+
+/* Verzamelt de afwijkingen voor de documenten op basis van de besluiten per controlepunt */
+function verzamel(state){
+  const bronTekst=b=>(b||[]).map(x=>[x.document,x.vindplaats].filter(Boolean).join(", ")).filter(Boolean).join("; ");
+  const afwijkingen = state.uitz.filter(u=>u.afspraak && u.afspraak.trim()).map(u=>({subkop:u.subkop,tekst:u.afspraak.trim(),voorwaarden:(u.voorwaarden||"").trim(),bron:bronTekst(u.bronnen),herkomst:"formulier",toepassing:u.toepassing}));
+  const caoToepassen=[], correcties=[], vervallen=[], open=[], perGeval=[];
+  for(const c of state.ctrl){
+    const toel=(c.tekst||"").trim();
+    if(c.keuze==="cao"){ caoToepassen.push(c); correcties.push({subkop:c.subkop,inFormulier:c.waarde_in_bron,geldt:`Voor de uitzendkracht geldt de cao: ${c.waarde_cao||"zie cao-bepaling"}`}); }
+    else if(c.keuze==="correctie"){ afwijkingen.push({subkop:c.subkop,tekst:toel,bron:"correctie",herkomst:"correctie",toepassing:c.toepassing}); correcties.push({subkop:c.subkop,inFormulier:c.waarde_in_bron,geldt:toel}); }
+    else if(c.keuze==="bron"){ afwijkingen.push({subkop:c.subkop,tekst:toel?`${c.waarde_in_bron} (${toel})`:c.waarde_in_bron,bron:"bevestigd",herkomst:"bevestigd",toepassing:c.toepassing,voorwaarden:c.signaal==="voorwaarde_toetsen"?(c.reden||""):""}); }
+    else if(c.keuze==="vervalt"){ vervallen.push(c); }
+    else if(c.keuze==="pergeval"){ perGeval.push(c); }
+    else open.push(c);
+  }
+  afwijkingen.sort((a,b)=>kopVolgorde(a.subkop)-kopVolgorde(b.subkop));
+  const openEss=open.filter(c=>groep(c)==="essentieel");
+  return {afwijkingen,caoToepassen,correcties,vervallen,open,perGeval,openEss};
+}
+const STOP=new Set("van het een de en per voor bij met aan als dat die wordt worden zijn naar tot uit niet ook geen wel deze dan over door".split(" "));
+function woorden(t){ return new Set(String(t||"").toLowerCase().replace(/[^a-z0-9à-ÿ€,% ]+/g," ").split(/\s+/).filter(w=>w.length>2&&!STOP.has(w))); }
+function lijkt(a,b){ const A=woorden(a),B=woorden(b); if(!A.size||!B.size) return 0; let n=0; for(const w of A) if(B.has(w)) n++; return n/Math.min(A.size,B.size); }
+function dubbelen(uitz){
+  const uit=[];
+  for(let i=0;i<uitz.length;i++) for(let j=i+1;j<uitz.length;j++){
+    const s=lijkt(uitz[i].afspraak,uitz[j].afspraak);
+    if(s>=0.7 || (uitz[i].subkop===uitz[j].subkop && s>=0.4)) uit.push([i,j]);
+  }
+  return uit;
+}
+function controleGeldig(c){
+  if(!c.keuze) return false;
+  if(c.keuze==="correctie" && !(c.tekst||"").trim()) return false;
+  if(c.keuze==="bron" && c.signaal==="mogelijk_onder_cao" && !(c.tekst||"").trim()) return false;
+  return true;
+}
+
+/* ---------- PDF ---------- */
+const WINANSI_EXTRA="€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ";
+function clean(s){
+  return String(s??"").replace(/\r/g,"").replace(/\t/g," ").replace(/≥/g,">=").replace(/≤/g,"<=").replace(/→/g,"->").replace(/\u00A0/g," ")
+    .split("").map(ch=>{const k=ch.charCodeAt(0); if(ch==="\n"||(k>=32&&k<=126)||(k>=160&&k<=255)||WINANSI_EXTRA.includes(ch)) return ch; return "?";}).join("");
+}
+class Pdf{
+  constructor(L,doc,font,bold,voet,merk){
+    Object.assign(this,{L,doc,font,bold,voet,merk});
+    this.M=56; this.PW=595.28; this.PH=841.89; this.W=this.PW-2*this.M;
+    this.INK=L.rgb(0,0,0); this.MUTED=L.rgb(.36,.36,.36); this.ACC=L.rgb(232/255,73/255,42/255); this.RED=L.rgb(.64,.09,.04); this.LINE=L.rgb(.84,.84,.84); this.WIT=L.rgb(1,1,1);
+    this.nieuwePagina();
+  }
+  nieuwePagina(){this.page=this.doc.addPage([this.PW,this.PH]); this.y=this.PH-60;}
+  ruimte(h){ if(this.y-h<64) this.nieuwePagina(); }
+  regels(text,size,f,maxW){
+    const out=[];
+    for(const alinea of clean(text).split("\n")){
+      let cur="";
+      for(let w of alinea.split(/ +/)){
+        const t=cur?cur+" "+w:w;
+        if(f.widthOfTextAtSize(t,size)<=maxW){cur=t;continue;}
+        if(cur) out.push(cur);
+        while(f.widthOfTextAtSize(w,size)>maxW){let i=w.length; while(i>1&&f.widthOfTextAtSize(w.slice(0,i),size)>maxW) i--; out.push(w.slice(0,i)); w=w.slice(i);}
+        cur=w;
+      }
+      out.push(cur);
+    }
+    return out;
+  }
+  tekst(text,o={}){
+    const size=o.size||10, f=o.bold?this.bold:this.font, ind=o.indent||0, lh=size*(o.lh||1.4);
+    for(const r of this.regels(text,size,f,this.W-ind)){ this.ruimte(lh); this.page.drawText(r,{x:this.M+ind,y:this.y-size,size,font:f,color:o.color||this.INK}); this.y-=lh; }
+    this.y-=(o.na??4);
+  }
+  titel(t,sub){
+    if(this.logoN){ const w=96,h=w*this.logoN.height/this.logoN.width; this.page.drawImage(this.logoN,{x:this.M,y:this.y-h,width:w,height:h}); this.y-=h+18; }
+    this.tekst(t,{size:18,bold:true,na:2,lh:1.25});
+    if(sub) this.tekst(sub,{size:10,color:this.MUTED,na:10});
+    this.page.drawRectangle({x:this.M,y:this.y-2,width:60,height:3,color:this.ACC}); this.y-=16;
+  }
+  kop(t){
+    this.ruimte(80); this.y-=8;
+    this.page.drawRectangle({x:this.M,y:this.y-13,width:3,height:14,color:this.ACC});
+    this.page.drawText(clean(t),{x:this.M+10,y:this.y-12,size:12,font:this.bold,color:this.INK});
+    this.y-=24;
+  }
+  subkop(t){ this.ruimte(30); this.tekst(t,{size:10,bold:true,na:2,color:this.ACC}); }
+  kv(label,waarde,lw=150){
+    const size=10, lh=size*1.4;
+    const r=this.regels(waarde||"—",size,this.font,this.W-lw);
+    this.ruimte(lh*Math.min(r.length,3));
+    this.page.drawText(clean(label),{x:this.M,y:this.y-size,size,font:this.font,color:this.MUTED});
+    r.forEach((line,i)=>{ if(i>0) this.ruimte(lh); this.page.drawText(line,{x:this.M+lw,y:this.y-size,size,font:this.font,color:this.INK}); this.y-=lh; });
+    this.y-=2;
+  }
+  punt(t,o={}){
+    const size=10, ind=12, lh=size*1.4, f=this.font;
+    const r=this.regels(t,size,f,this.W-ind);
+    r.forEach((line,i)=>{ this.ruimte(lh); if(i===0) this.page.drawText("•",{x:this.M+2,y:this.y-size,size,font:f,color:o.color||this.INK}); this.page.drawText(line,{x:this.M+ind,y:this.y-size,size,font:f,color:o.color||this.INK}); this.y-=lh; });
+    this.y-=3;
+  }
+  lijn(){ this.page.drawLine({start:{x:this.M,y:this.y},end:{x:this.PW-this.M,y:this.y},thickness:.6,color:this.LINE}); }
+  tekenvak(labels){
+    this.ruimte(150); this.y-=10;
+    for(const l of labels){ this.page.drawText(clean(l),{x:this.M,y:this.y-10,size:10,font:this.font,color:this.MUTED}); this.page.drawLine({start:{x:this.M+110,y:this.y-12},end:{x:this.M+360,y:this.y-12},thickness:.6,color:this.LINE}); this.y-=30; }
+  }
+  get form(){ return this._form ||= this.doc.getForm(); }
+  bijschrift(t,ind=0){ this.ruimte(12); this.page.drawText(clean(t),{x:this.M+ind,y:this.y-8,size:8,font:this.font,color:this.MUTED}); this.y-=11; }
+  veld(naam,o={}){
+    const h=o.h||20, ind=o.indent||0;
+    this.ruimte(h+6);
+    const tf=this.form.createTextField(naam);
+    if(o.multiline) tf.enableMultiline();
+    tf.addToPage(this.page,{x:this.M+ind,y:this.y-h,width:o.width||(this.W-ind),height:h,borderWidth:.6,borderColor:this.LINE,backgroundColor:this.L.rgb(.96,.96,.96),textColor:this.INK});
+    tf.setFontSize(9);
+    this.y-=h+8;
+  }
+  vinkje(naam,label,hint){
+    this.ruimte(hint?30:18);
+    const cb=this.form.createCheckBox(naam);
+    cb.addToPage(this.page,{x:this.M,y:this.y-11,width:11,height:11,borderWidth:.8,borderColor:this.INK,backgroundColor:this.L.rgb(1,1,1)});
+    this.page.drawText(clean(label),{x:this.M+18,y:this.y-10,size:10,font:this.bold,color:this.INK});
+    this.y-=15;
+    if(hint){ this.page.drawText(clean(hint),{x:this.M+18,y:this.y-8,size:8.5,font:this.font,color:this.MUTED}); this.y-=12; }
+  }
+  afronden(){
+    const p=this.doc.getPages();
+    p.forEach((pg,i)=>{
+      pg.drawRectangle({x:0,y:0,width:this.PW,height:38,color:this.INK});
+      const pag=`     Pagina ${i+1} van ${p.length}`, maxW=this.W-70;
+      let basis=clean(`${this.voet}${this.merk?" - "+this.merk:""}`);
+      while(basis.length>10 && this.font.widthOfTextAtSize(basis+pag,8)>maxW) basis=basis.slice(0,-2).trimEnd()+"…";
+      pg.drawText(basis.replace(/…+$/,"…")+pag,{x:this.M,y:15,size:8,font:this.font,color:this.WIT});
+      if(this.logoD){ const h=14,w=h*this.logoD.width/this.logoD.height; pg.drawImage(this.logoD,{x:this.PW-this.M-w,y:12,width:w,height:h}); }
+    });
+  }
+}
+async function maakPdf(L,voet,merk){
+  const doc=await L.PDFDocument.create();
+  const font=await doc.embedFont(L.StandardFonts.Helvetica), bold=await doc.embedFont(L.StandardFonts.HelveticaBold);
+  const p=new Pdf(L,doc,font,bold,voet,merk);
+  p.logoN=await doc.embedPng(b64Bytes(LOGO_NORMAAL)); p.logoD=await doc.embedPng(b64Bytes(LOGO_DIAP));
+  return p;
+}
+
+async function bouwInrichting(L,state){
+  const d=state.data, v=verzamel(state);
+  const p=await maakPdf(L,`Inrichtingsdocument ${d.klant.bedrijfsnaam||""} - intern, niet naar opdrachtgever`,state.uitlener);
+  p.doc.setTitle(`Inrichtingsdocument ${d.klant.bedrijfsnaam||""}`);
+  p.titel("Inrichtingsdocument gelijkwaardige beloning", v.openEss.length?`CONCEPT - nog ${v.openEss.length} essentieel controlepunt(en) open`:v.open.length?`Peildatum ${nlDatum(state.peildatum)} - ${v.open.length} niet-essentieel punt(en) nog te beoordelen`:`Peildatum ${nlDatum(state.peildatum)}`);
+  p.kop("Gegevens");
+  p.kv("Opdrachtgever",d.klant.bedrijfsnaam);
+  if(d.klant.kvk_nummer) p.kv("KvK-nummer",d.klant.kvk_nummer);
+  p.kv("Contactpersoon",[d.klant.contactpersoon_naam,d.klant.contactpersoon_email].filter(Boolean).join(", "));
+  p.kv("Uitlener",state.uitlener);
+  p.kv("Intercedent",state.intercedent);
+  p.kv("Bronformulier",`${d.meta.bron_naam||d.meta.bron_type}, ingevuld ${nlDatum(d.meta.bron_datum)}`);
+  if(d.meta.ingevuld_door) p.kv("Ingevuld door",d.meta.ingevuld_door);
+  p.kv("Peildatum",nlDatum(state.peildatum));
+  p.kv("Cao",d.cao.van_toepassing?`${d.cao.naam||"—"} (${nlDatum(d.cao.looptijd_van)} t/m ${nlDatum(d.cao.looptijd_tot)})`:"Geen cao, eigen loongebouw");
+  p.kv("Eigen regeling naast cao",d.cao.eigen_regeling_naast_cao===true?"Ja":d.cao.eigen_regeling_naast_cao===false?"Nee":"—");
+
+  const k=d.cao_keuzes;
+  if(Object.values(k).some(x=>x!=null&&x!=="")){
+  p.kop("Cao-keuzes");
+  p.kv("Uren per week",k.uren_per_week!=null?String(k.uren_per_week):"—");
+  p.kv("Loontabel",k.loontabel||"—");
+  p.kv("Dagvenster",k.dagvenster||"—");
+  p.kv("Ploegendienst",k.ploegendienst===true?"Ja":k.ploegendienst===false?"Nee":"—");
+  p.kv("Overwerk in salaris",k.overwerk_inbegrepen_in_salaris===true?"Ja":k.overwerk_inbegrepen_in_salaris===false?"Nee":"—");
+  }
+
+  if(state.functies.length) p.kop("Functies");
+  state.functies.forEach(f=>p.kv(f.functienaam||"—",[f.schaal_of_functiegroep?`Schaal/functiegroep ${f.schaal_of_functiegroep}`:"Schaal onbekend",f.opmerking].filter(Boolean).join(". ")));
+
+  const items=[
+    ...v.afwijkingen.map(a=>({...a,type:"afw"})),
+    ...v.caoToepassen.map(c=>({subkop:c.subkop,toepassing:c.toepassing,type:"cao",tekst:`Cao toepassen: ${c.waarde_cao||"cao-bepaling"}${(c.tekst||"").trim()?` (${c.tekst.trim()})`:""}`})),
+    ...v.perGeval.map(c=>({subkop:c.subkop,toepassing:c.toepassing,type:"pergeval",tekst:`Per geval bepalen: ${c.waarde_in_bron}`,voorwaarden:c.reden||""}))
+  ];
+  items.forEach(x=>x.groep=groep(x));
+  const label=a=>a.type!=="afw"?"":a.herkomst==="correctie"?" [gecorrigeerd]":a.herkomst==="bevestigd"?" [na controle bevestigd]":a.bron?` [${a.bron}]`:"";
+
+  p.kop("1. Essentieel voor de inrichting");
+  for(const e of ELEMENTEN){
+    const its=items.filter(x=>x.groep==="essentieel"&&e.koppen.includes(x.subkop));
+    const openE=v.open.filter(c=>e.koppen.includes(c.subkop));
+    p.subkop(e.naam);
+    if(its.length){ for(const x of its){ p.punt(x.tekst+label(x)); if(x.voorwaarden) p.tekst(`Voorwaarden: ${x.voorwaarden}`,{size:9,indent:12,color:p.MUTED,na:3}); } }
+    else if(openE.length) p.punt("Nog niet beoordeeld.",{color:p.RED});
+    else p.punt(d.cao.van_toepassing?"Geen afwijking: inrichten conform de cao.":"Niet opgegeven door de opdrachtgever.",{color:p.MUTED});
+  }
+
+  p.kop("2. Structureel toepassen");
+  const struct=items.filter(x=>x.groep==="structureel");
+  if(!struct.length) p.tekst(d.cao.van_toepassing?"Geen overige afwijkingen: inrichten conform de cao.":"Geen overige afspraken.",{color:p.MUTED});
+  for(const h of HOOFDSTUKKEN){
+    const hs=struct.filter(x=>hoofdstukVan(x.subkop)===h).sort((a,b)=>kopVolgorde(a.subkop)-kopVolgorde(b.subkop));
+    if(!hs.length) continue;
+    p.tekst(h,{size:11,bold:true,na:4});
+    let vorige=null;
+    for(const x of hs){
+      if(x.subkop!==vorige){ p.subkop(x.subkop); vorige=x.subkop; }
+      p.punt(x.tekst+label(x));
+      if(x.voorwaarden) p.tekst(`Voorwaarden: ${x.voorwaarden}`,{size:9,indent:12,color:p.MUTED,na:3});
+    }
+  }
+
+  const voorw=items.filter(x=>x.groep==="voorwaardelijk").sort((a,b)=>kopVolgorde(a.subkop)-kopVolgorde(b.subkop));
+  if(voorw.length){
+    p.kop("3. Alleen onder voorwaarden");
+    p.tekst("Deze regelingen gelden alleen als aan een voorwaarde is voldaan. De voorwaarden staan in de bijlage.",{size:9,color:p.MUTED,na:6});
+    for(const x of voorw) p.punt(`${x.subkop}: ${x.tekst}`);
+  }
+  if(v.vervallen.length){
+    p.kop("Vervallen controlepunten");
+    for(const c of v.vervallen) p.punt(`${c.subkop}: ${c.waarde_in_bron}${(c.tekst||"").trim()?` (${c.tekst.trim()})`:""}`);
+  }
+  if(v.open.length){
+    p.kop(v.openEss.length?"Open controlepunten":"Nog te beoordelen (niet essentieel)");
+    for(const c of v.open) p.punt(`${c.subkop} (${SIGNAAL[c.signaal]?.label||c.signaal}): ${c.reden||c.waarde_in_bron}`,{color:p.RED});
+  }
+  if(d.conform_cao.length){
+    p.kop("Conform cao (geen actie)");
+    p.tekst([...d.conform_cao].sort((a,b)=>kopVolgorde(a)-kopVolgorde(b)).join(", "),{color:p.MUTED});
+  }
+  if(d.ontbrekend.length){
+    p.kop("Niet in het formulier");
+    p.tekst(d.ontbrekend.join(", "),{color:p.MUTED});
+  }
+  if(voorw.length){
+    p.kop("Bijlage: voorwaarden");
+    for(const x of voorw){
+      p.subkop(x.subkop);
+      p.tekst(x.tekst,{size:9,na:2});
+      p.tekst(x.voorwaarden?`Voorwaarden: ${x.voorwaarden}`:"Geen voorwaarden vastgelegd.",{size:9,color:p.MUTED,na:2});
+      if(x.bron) p.tekst(`Bron: ${x.bron}`,{size:8,color:p.MUTED,na:6});
+    }
+  }
+  p.afronden();
+  return p.doc.save();
+}
+
+async function bouwAanvulling(L,state){
+  const d=state.data, v=verzamel(state);
+  const naam=d.klant.bedrijfsnaam||"opdrachtgever";
+  const p=await maakPdf(L,`Aanvulling arbeidsvoorwaarden ${naam}`,state.uitlener);
+  p.doc.setTitle(`Aanvulling arbeidsvoorwaarden ${naam}`);
+  p.titel("Aanvulling op het formulier arbeidsvoorwaarden",d.klant.kvk_nummer?`${naam}, KvK ${d.klant.kvk_nummer}`:naam);
+  p.tekst(`Deze aanvulling hoort bij het formulier “${d.meta.bron_naam||"arbeidsvoorwaarden"}” dat ${naam} op ${nlDatum(d.meta.bron_datum)} heeft ingevuld. Bij de controle van dat formulier zijn de onderstaande punten met u afgestemd. Het formulier en deze aanvulling worden samen ter ondertekening aangeboden.`,{na:8});
+  p.kop("Afgestemde punten");
+  for(const c of v.correcties){
+    p.subkop(c.subkop);
+    p.kv("In het formulier",c.inFormulier,120);
+    p.kv("Wat geldt",c.geldt,120);
+    p.y-=4;
+  }
+  if(d.cao.van_toepassing){
+    p.kop("Uitgangspunt");
+    p.tekst(`Voor de uitzendkracht hanteert ${state.uitlener} minimaal de cao ${d.cao.naam||""}. Waar het formulier een regeling noemt die lager is dan de cao, geldt de cao-bepaling, tenzij u een gunstigere regeling opgeeft.`);
+  }
+  p.kop("Akkoord");
+  p.tekst(`Met de ondertekening bevestigt ${naam} dat het formulier van ${nlDatum(d.meta.bron_datum)} samen met deze aanvulling de volledige en juiste arbeidsvoorwaarden weergeeft, en dat wijzigingen direct aan ${state.uitlener} worden doorgegeven.`);
+  p.tekenvak(["Naam","Functie","Datum","Handtekening"]);
+  p.afronden();
+  return p.doc.save();
+}
+
+/* ---------- Scenario 2: uitvraag ---------- */
+const MEER=[
+ {id:"loon",subkop:"Loon",label:"Loon",hint:"Hoger loon dan de cao-schaal, een eigen loontabel of persoonlijke toeslagen."},
+ {id:"eindejaar",subkop:"Eindejaarsuitkering",label:"Eindejaarsuitkering of dertiende maand"},
+ {id:"bonus",subkop:"Variabele uitkeringen",label:"Bonus, winstdeling of prestatie-uitkering"},
+ {id:"eenmalig",subkop:"Eenmalige uitkeringen",label:"Eenmalige uitkeringen",hint:"Bovenop wat de cao al afspreekt."},
+ {id:"jubileum",subkop:"Jubileum uitkeringen",label:"Jubileumuitkering"},
+ {id:"pensioen",subkop:"Pensioen",label:"Pensioen",hint:"Een hogere werkgeversbijdrage of een aanvullende regeling."},
+ {id:"ziekte",subkop:"Loondoorbetaling bij ziekte",label:"Loondoorbetaling bij ziekte",hint:"Een hoger percentage of minder wachtdagen."},
+ {id:"vakantie",subkop:"Vakantiedagen",label:"Vakantiedagen",hint:"Extra dagen, bijvoorbeeld naar leeftijd of dienstjaren."},
+ {id:"adv",subkop:"ADV/ATV regeling bijzonderheden",label:"ADV of ATV"},
+ {id:"feestdagen",subkop:"Feestdagen",label:"Extra feestdagen of vrije dagen"},
+ {id:"bijzonder",subkop:"Bijzonder verlof",label:"Bijzonder verlof",hint:"Bijvoorbeeld bij huwelijk, overlijden of verhuizing."},
+ {id:"sluiting",subkop:"Verplicht verlof",label:"Bedrijfssluiting of verplichte vrije dagen",hint:"Welke dagen, en welk verlof de medewerker daarvoor gebruikt."},
+ {id:"overwerk",subkop:"Overwerktoeslag",label:"Overwerktoeslag"},
+ {id:"onregelmatig",subkop:"Onregelmatigheidstoeslag",label:"Toeslag voor avond-, nacht- of weekendwerk"},
+ {id:"ploegen",subkop:"Ploegentoeslag",label:"Ploegentoeslag"},
+ {id:"toeslagen",subkop:"Overig / niet in cao",label:"Andere toeslagen",hint:"Bijvoorbeeld stand-by, consignatie, BHV of vuil werk."},
+ {id:"reiskosten",subkop:"Reiskostenvergoeding",label:"Reiskostenvergoeding",hint:"Woon-werkverkeer of zakelijke kilometers."},
+ {id:"reistijd",subkop:"Reistijdvergoeding",label:"Reistijdvergoeding"},
+ {id:"thuiswerk",subkop:"Thuiswerkvergoeding",label:"Thuiswerk- of internetvergoeding"},
+ {id:"kosten",subkop:"Overige kosten vergoeding",label:"Kostenvergoedingen",hint:"Bijvoorbeeld kleding, schoenen, gereedschap of maaltijden."},
+ {id:"opleiding",subkop:"Duurzame inzetbaarheid",label:"Opleiding en ontwikkeling",hint:"Budget, opleidingsdagen of coaching."},
+ {id:"vitaliteit",subkop:"Vitaliteit en gezondheid",label:"Vitaliteit en gezondheid",hint:"Bijvoorbeeld PMO, sportregeling of vitaliteitsbudget."},
+ {id:"overig",subkop:"Overig / niet in cao",label:"Overige regelingen",hint:"Alles wat hierboven niet staat."}
+];
+const naarB64=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+const uitB64=s=>JSON.parse(decodeURIComponent(escape(atob(s))));
+function isoUitNl(s){ const m=String(s||"").match(/(\d{1,2})[-\/. ](\d{1,2})[-\/. ](\d{4})/); return m?`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`:null; }
+
+async function bouwUitvraag(L,inv){
+  const naam=inv.klant.bedrijfsnaam;
+  const p=await maakPdf(L,`Uitvraag arbeidsvoorwaarden ${naam}`,inv.uitlener);
+  p.doc.setTitle(`Uitvraag arbeidsvoorwaarden ${naam}`);
+  p.titel("Uitvraag arbeidsvoorwaarden",`${naam}, cao ${inv.cao.naam}`);
+  p.tekst(`Voor uw uitzendkrachten past ${inv.uitlener} de cao ${inv.cao.naam} toe. Wij vragen u alleen wat de cao niet voor ons regelt: wat u uw eigen medewerkers méér geeft dan de cao. Lege velden betekenen dat het klopt of niet van toepassing is.`,{na:6});
+  p.tekst(`Vul dit formulier in met Adobe Acrobat Reader, sla het op en stuur het terug aan ${inv.intercedent||inv.uitlener}. U ontvangt daarna het volledige overzicht ter ondertekening.`,{color:p.MUTED,na:4});
+
+  p.kop("1. Geeft u meer dan de cao?");
+  p.tekst("Kruis alleen aan waar u uw eigen medewerkers méér geeft dan de cao, en beschrijf kort wat en onder welke voorwaarden. Geeft u niet meer, dan laat u het leeg.",{na:8});
+  for(const m of MEER){
+    p.ruimte(80);
+    p.vinkje(`meer_${m.id}`,m.label,m.hint);
+    p.veld(`toel_${m.id}`,{h:34,multiline:true,indent:18});
+  }
+
+  p.kop("2. Ingevuld door");
+  for(const [id,l] of [["door_naam","Naam"],["door_functie","Functie"],["door_email","E-mail"],["door_datum","Datum"]]){
+    p.ruimte(28);
+    p.page.drawText(l,{x:p.M,y:p.y-14,size:10,font:p.font,color:p.MUTED});
+    p.veld(id,{indent:110,width:250});
+  }
+  p.tekst(`Wijzigen uw arbeidsvoorwaarden later? Geef dat dan direct door aan ${inv.uitlener}.`,{size:9,color:p.MUTED});
+
+  const meta=p.form.createTextField("bg_meta");
+  meta.setText(naarB64({v:1,...inv}));
+  meta.addToPage(p.doc.getPage(0),{x:0,y:0,width:1,height:1,hidden:true});
+  meta.enableReadOnly();
+  p.afronden();
+  p.form.updateFieldAppearances(p.font);
+  return p.doc.save();
+}
+
+async function leesUitvraag(L,bytes){
+  let doc;
+  try{ doc=await L.PDFDocument.load(bytes,{ignoreEncryption:true}); }catch(e){ return {fout:"Dit bestand kan niet als PDF worden geopend."}; }
+  const form=doc.getForm();
+  let inv;
+  try{ inv=uitB64(form.getTextField("bg_meta").getText()); }catch(e){ return {fout:"Dit is geen uitvraag uit de beloningsgenerator. Gebruik voor een eigen formulier van de opdrachtgever de route ‘Formulier van de opdrachtgever’."}; }
+  const txt=n=>{try{return (form.getTextField(n).getText()||"").trim()}catch(e){return ""}};
+  const chk=n=>{try{return form.getCheckBox(n).isChecked()}catch(e){return false}};
+  const uitz=[], ctrl=[];
+  for(const m of MEER){
+    const t=txt(`toel_${m.id}`);
+    if(t) uitz.push({subkop:m.subkop,afspraak:t,bron_vindplaats:"uitvraag"});
+    else if(chk(`meer_${m.id}`)) ctrl.push({subkop:m.subkop,signaal:"onduidelijk",waarde_in_bron:`${m.label}: aangekruist, zonder toelichting`,waarde_cao:null,reden:"Vraag de opdrachtgever wat er precies meer wordt gegeven."});
+  }
+  const door=[txt("door_naam"),txt("door_functie"),txt("door_email")].filter(Boolean).join(", ");
+  const datum=isoUitNl(txt("door_datum"));
+  const data={
+    meta:{schema_versie:"1.1",bron_type:"uitvraag_scenario2",bron_naam:"Uitvraag arbeidsvoorwaarden",bron_datum:datum,peildatum:inv.peildatum,ingevuld_door:door||null},
+    klant:inv.klant,
+    cao:{van_toepassing:true,naam:inv.cao.naam,looptijd_van:inv.cao.looptijd_van||null,looptijd_tot:inv.cao.looptijd_tot||null,eigen_regeling_naast_cao:uitz.length>0},
+    cao_keuzes:inv.cao_keuzes, functies:inv.functies, conform_cao:[], uitzonderingen:uitz, te_controleren:ctrl, ontbrekend:[]
+  };
+  normaliseer(data);
+  const waarschuwingen=[];
+  if(!door) waarschuwingen.push("De opdrachtgever heeft niet ingevuld wie het formulier heeft ingevuld.");
+  if(!datum) waarschuwingen.push("De datum van invullen ontbreekt of is niet als dd-mm-jjjj ingevuld.");
+  return {data,inv,waarschuwingen};
+}
+</script>
+
+<script id="ui">
+const $=s=>document.querySelector(s);
+document.getElementById("logo").src="data:image/png;base64,"+LOGO_DIAP;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let state=null;
+const UITLENERS=["Intermediair Uitzendbureau","Buddo","Zorgmensen","50+Werkt","IU Groep"];
+
+function vandaag(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function msg(el,type,html){$(el).innerHTML=html?`<div class="msg ${type}">${html}</div>`:""}
+function zetStap(n,open){$(n).classList.toggle("locked",!open)}
+
+function laadTekst(tekst){
+  let r;
+  try{ r=parseBron(tekst); }
+  catch(e){ msg("#m1","err",`Dit bestand kan niet worden gelezen. Gebruik het bestand dat de beloningsassistent heeft gemaakt. (${esc(e.message)})`); return; }
+  if(r.fouten){ msg("#m1","err",r.fouten.map(esc).join("<br>")); return; }
+  if(r.oud){
+    state=null; zetStap("#s2",false); zetStap("#s3",false);
+    msg("#m1","err","Dit is een oud inlenersbeloningsformulier (vóór 2026). Dat is niet genoeg om opnieuw te laten tekenen. Geldt er een cao? Kies dan ‘Alleen een cao’. Heeft de opdrachtgever een eigen loongebouw? Laat dan de standaard uitvraag op wijzerbelonen.nl invullen.");
+    return;
+  }
+  const d=r.data;
+  state={
+    scenario:1, data:d,
+    uitz:d.uitzonderingen.map(u=>({...u})),
+    ctrl:d.te_controleren.map(c=>({...c,keuze:c.signaal==="mogelijk_onder_cao"?"cao":"",tekst:""})),
+    functies:d.functies.map(f=>({...f})),
+    uitlener:UITLENERS[0], intercedent:"", peildatum:vandaag()
+  };
+  msg("#m1",r.waarschuwingen.length?"warn":"ok",r.waarschuwingen.length?r.waarschuwingen.map(esc).join("<br>"):`Formulier van ${esc(d.klant.bedrijfsnaam||"opdrachtgever")} ingelezen.`);
+  zetStap("#s2",true); zetStap("#s3",true);
+  render();
+  $("#s2").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+}
+$("#lees").addEventListener("click",()=>laadTekst($("#bron").value));
+async function laadBestand(f){ if(!f) return; leegGedeeld(); laadTekst(await f.text()); }
+$("#bestand").addEventListener("change",e=>laadBestand(e.target.files[0]));
+const dz=$("#drop");
+["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("over");}));
+dz.addEventListener("drop",e=>laadBestand(e.dataTransfer.files[0]));
+function leegGedeeld(){ state=null; msg("#m3"); ["#overzicht","#controles","#uitzonderingen"].forEach(s=>$(s).innerHTML=""); zetStap("#s2",false); zetStap("#s3",false); }
+$("#wis").addEventListener("click",()=>{ leegGedeeld(); $("#bron").value=""; $("#bestand").value=""; msg("#m1"); });
+
+/* Scenario kiezen */
+document.querySelectorAll(".modes button").forEach(b=>b.addEventListener("click",()=>{
+  const m=b.dataset.mode; if(document.body.dataset.mode===m) return;
+  document.body.dataset.mode=m;
+  document.querySelectorAll(".modes button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
+  $("#s2 .step-nr").textContent=m==="2"?"3":"2";
+  $("#s3 .step-nr").textContent=m==="2"?"4":"3";
+  $("#s3hint").textContent=m==="2"?"Het inrichtingsdocument is intern en bevat de afwijkingen bovenop de cao.":"Het inrichtingsdocument is intern. De aanvulling gaat samen met het formulier van de opdrachtgever ter ondertekening naar HelloFlex.";
+  leegGedeeld(); msg("#mb2"); $("#b_upload").value="";
+}));
+
+/* Scenario 2: uitvraag maken */
+$("#b_uitlener").innerHTML=UITLENERS.map(u=>`<option>${esc(u)}</option>`).join("");
+$("#b_peildatum").value=vandaag();
+function verzamelInvoer(){
+  const val=id=>$(id).value.trim();
+  return {
+    klant:{bedrijfsnaam:val("#b_bedrijf"),kvk_nummer:null,vestigingsplaats:null,contactpersoon_naam:val("#b_contact")||null,contactpersoon_email:val("#b_email")||null},
+    cao:{naam:val("#b_cao"),looptijd_van:val("#b_van")||null,looptijd_tot:val("#b_tot")||null},
+    cao_keuzes:{uren_per_week:null,loontabel:null,dagvenster:null,ploegendienst:null,overwerk_inbegrepen_in_salaris:null},
+    functies:[],
+    uitlener:val("#b_uitlener"), intercedent:val("#b_intercedent"), peildatum:val("#b_peildatum")||vandaag()
+  };
+}
+$("#b_maak").onclick=async()=>{
+  const inv=verzamelInvoer();
+  const mis=[]; if(!inv.klant.bedrijfsnaam) mis.push("de bedrijfsnaam"); if(!inv.cao.naam) mis.push("de cao");
+  if(mis.length){ msg("#mb1","err",`Vul ${mis.join(" en ")} in om de uitvraag te maken.`); return; }
+  if(typeof PDFLib==="undefined"){ msg("#mb1","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
+  try{
+    const k=inv.klant.bedrijfsnaam.replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_");
+    download(await bouwUitvraag(PDFLib,inv),`Uitvraag_${k}_${inv.peildatum}.pdf`);
+    msg("#mb1","ok",`Uitvraag gemaakt. Stuur hem naar ${esc(inv.klant.contactpersoon_naam||"de opdrachtgever")} en lees hem in stap 2 in zodra hij terug is.`);
+  }catch(e){ msg("#mb1","err",`De uitvraag kon niet worden gemaakt: ${esc(e.message)}`); }
+};
+
+/* Scenario 2: ingevulde uitvraag inlezen */
+$("#b_upload").onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  leegGedeeld();
+  if(typeof PDFLib==="undefined"){ msg("#mb2","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
+  const r=await leesUitvraag(PDFLib,new Uint8Array(await f.arrayBuffer()));
+  if(r.fout){ msg("#mb2","err",esc(r.fout)); return; }
+  const d=r.data;
+  state={scenario:2,data:d,uitz:d.uitzonderingen.map(u=>({...u})),ctrl:d.te_controleren.map(c=>({...c,keuze:"",tekst:""})),functies:d.functies.map(x=>({...x})),uitlener:r.inv.uitlener,intercedent:r.inv.intercedent,peildatum:r.inv.peildatum};
+  const kern=`Uitvraag van ${esc(d.klant.bedrijfsnaam)} ingelezen: ${d.uitzonderingen.length} afwijking(en), ${d.te_controleren.length} controlepunt(en).`+(!d.uitzonderingen.length&&!d.te_controleren.length?" De opdrachtgever geeft niets meer dan de cao.":"");
+  msg("#mb2",r.waarschuwingen.length?"warn":"ok",[kern,...r.waarschuwingen.map(esc)].join("<br>"));
+  zetStap("#s2",true); zetStap("#s3",true); render();
+  $("#s2").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+};
+
+function render(){ renderOverzicht(); renderControles(); renderUitz(); renderKnoppen(); }
+
+function renderOverzicht(){
+  const d=state.data, v=verzamel(state);
+  $("#overzicht").innerHTML=`
+  <dl class="facts">
+    <div><dt>Opdrachtgever</dt><dd>${esc(d.klant.bedrijfsnaam||"—")}</dd></div>
+    ${d.klant.kvk_nummer?`<div><dt>KvK</dt><dd>${esc(d.klant.kvk_nummer)}</dd></div>`:""}
+    <div><dt>Cao</dt><dd>${d.cao.van_toepassing?esc(d.cao.naam||"—"):"Geen cao, eigen loongebouw"}</dd></div>
+    <div><dt>Bronformulier</dt><dd>${esc(d.meta.bron_naam||d.meta.bron_type)}, ${esc(nlDatum(d.meta.bron_datum))}</dd></div>
+  </dl>
+  <p class="tally"><span><b>${state.uitz.length}</b> afwijkingen</span><span><b>${state.ctrl.length}</b> controlepunten (<span id="openTel">${v.open.length}</span> open, waarvan <span id="openEss">${v.openEss.length}</span> essentieel)</span><span><b>${d.conform_cao.length}</b> conform cao</span></p>
+  <div class="fields" style="margin:16px 0 8px">
+    <label class="f">Uitlener<select id="uitlener">${UITLENERS.map(u=>`<option${u===state.uitlener?" selected":""}>${esc(u)}</option>`).join("")}</select></label>
+    <label class="f">Intercedent<input id="intercedent" value="${esc(state.intercedent)}" autocomplete="name"></label>
+    <label class="f">Peildatum<input id="peildatum" type="date" value="${esc(state.peildatum)}"></label>
+  </div>
+  ${state.functies.length?`<div class="fields" style="margin-bottom:8px">${state.functies.map((f,i)=>`<label class="f">Schaal of functiegroep: ${esc(f.functienaam)}<input data-functie="${i}" value="${esc(f.schaal_of_functiegroep||"")}" placeholder="Uit de Caoloon-uitdraai"></label>`).join("")}</div>`:""}
+  ${d.ontbrekend.length?`<p class="small-list">Niet in het formulier: ${esc(d.ontbrekend.join(", "))}</p>`:""}`;
+  $("#uitlener").onchange=e=>state.uitlener=e.target.value;
+  $("#intercedent").oninput=e=>state.intercedent=e.target.value;
+  $("#peildatum").onchange=e=>state.peildatum=e.target.value;
+  document.querySelectorAll("[data-functie]").forEach(el=>el.oninput=e=>state.functies[+e.target.dataset.functie].schaal_of_functiegroep=e.target.value);
+}
+
+const KEUZES=[
+  ["cao","Cao geldt voor de uitzendkracht"],
+  ["correctie","Opdrachtgever corrigeert het formulier"],
+  ["bron","Formulier klopt, afspraak van de opdrachtgever geldt"],
+  ["vervalt","Niet van toepassing, vervalt"]
+];
+const KEUZES_VOORW=[
+  ["bron","Uitzendkracht kan aan de voorwaarde voldoen: de regeling geldt"],
+  ["pergeval","Per geval bepalen door de backoffice"],
+  ["vervalt","Niet van toepassing, vervalt"]
+];
+function renderControles(){
+  if(!state.ctrl.length){ $("#controles").innerHTML=`<div class="msg ok">Geen controlepunten. Ga door naar de documenten.</div>`; return; }
+  const volgorde=state.ctrl.map((c,i)=>i).sort((a,b)=>sorteerSleutel(state.ctrl[a])-sorteerSleutel(state.ctrl[b]));
+  let vorigeGroep=null;
+  $("#controles").innerHTML=`<h3 style="margin:24px 0 4px">Controlepunten</h3><p class="hint">Begin bij de essentiële punten. Zijn die beoordeeld, dan kun je het inrichtingsdocument al downloaden.</p>`+volgorde.map(i=>{
+    const c=state.ctrl[i];
+    const g=groep(c);
+    let kopHtml="";
+    if(g!==vorigeGroep){ vorigeGroep=g; const n=state.ctrl.filter(x=>groep(x)===g).length, o=state.ctrl.filter(x=>groep(x)===g&&!controleGeldig(x)).length; kopHtml=`<h4 class="grp grp-${g}">${esc(GROEP_LABEL[g])} <span>${n} punt(en), ${o} open</span></h4>`; }
+    const toepHtml=g==="essentieel"?`<span class="pill pill-ess">Essentieel</span>`:`<select class="toep" data-ctoep="${i}" aria-label="Toepassing"><option value="structureel"${c.toepassing!=="voorwaardelijk"?" selected":""}>Structureel</option><option value="voorwaardelijk"${c.toepassing==="voorwaardelijk"?" selected":""}>Alleen onder voorwaarden</option></select>`;
+    const s=SIGNAAL[c.signaal]||{label:c.signaal,cls:"s-ondu"};
+    const keuzes=c.signaal==="voorwaarde_toetsen"?KEUZES_VOORW:KEUZES;
+    const vergelijk=(c.bronnen||[]).filter(b=>b.tekst).length>=2
+      ? `<div class="compare">${c.bronnen.filter(b=>b.tekst).map(b=>`<div><span>${esc(b.document||"Bron")}${b.vindplaats?", "+esc(b.vindplaats):""}</span>${esc(b.tekst)}</div>`).join("")}</div>`
+      : `<div class="compare"><div><span>In het formulier</span>${esc(c.waarde_in_bron)}</div><div><span>Volgens de cao</span>${esc(c.waarde_cao||"—")}</div></div>`;
+    const tekstLabel=c.keuze==="correctie"?"Wat geldt volgens de opdrachtgever (komt in de aanvulling)":c.keuze==="bron"&&c.signaal==="mogelijk_onder_cao"?"Waarom is dit niet lager dan de cao? (verplicht)":"Antwoord of toelichting (optioneel)";
+    return kopHtml+`<article class="ctrl ${s.cls} ${controleGeldig(c)?"done":""}" data-i="${i}">
+      <div class="ctrl-head"><h3>${esc(c.subkop)}</h3><span class="ctrl-tags">${toepHtml}<span class="pill">${esc(s.label)}</span></span></div>
+      ${vergelijk}
+      <p class="reden">${esc(c.reden||"")}</p>
+      <div class="keuzes" role="radiogroup" aria-label="Besluit ${esc(c.subkop)}">${keuzes.map(([k,l])=>`<label><input type="radio" name="k${i}" value="${k}"${c.keuze===k?" checked":""}> ${esc(l)}</label>`).join("")}</div>
+      <label class="f">${esc(tekstLabel)}<textarea rows="2" data-tekst="${i}">${esc(c.tekst)}</textarea></label>
+    </article>`;
+  }).join("");
+  document.querySelectorAll(".ctrl input[type=radio]").forEach(r=>r.onchange=e=>{
+    const i=+e.target.closest(".ctrl").dataset.i; state.ctrl[i].keuze=e.target.value; renderControles(); renderKnoppen(); updateTeller();
+    document.querySelector(`.ctrl[data-i="${i}"] input[value="${e.target.value}"]`)?.focus();
+  });
+  document.querySelectorAll("[data-ctoep]").forEach(sel=>sel.onchange=e=>{ state.ctrl[+e.target.dataset.ctoep].toepassing=e.target.value; renderControles(); renderKnoppen(); updateTeller(); });
+  document.querySelectorAll("[data-tekst]").forEach(t=>t.oninput=e=>{
+    const i=+e.target.dataset.tekst; state.ctrl[i].tekst=e.target.value;
+    e.target.closest(".ctrl").classList.toggle("done",controleGeldig(state.ctrl[i])); renderKnoppen(); updateTeller();
+  });
+}
+function updateTeller(){ const el=$("#openTel"); if(el) el.textContent=state.ctrl.filter(c=>!controleGeldig(c)).length; const e2=$("#openEss"); if(e2) e2.textContent=state.ctrl.filter(c=>groep(c)==="essentieel"&&!controleGeldig(c)).length; }
+
+function renderUitz(){
+  const opties=sel=>HOOFDSTUKKEN.map(h=>`<optgroup label="${esc(h)}">${KOPPEN.filter(([hh,k])=>hh===h&&!VERBORGEN_KOPPEN.has(k)).map(([,k])=>`<option${k===sel?" selected":""}>${esc(k)}</option>`).join("")}</optgroup>`).join("");
+  const idx=state.uitz.map((u,i)=>({u,i})).sort((a,b)=>kopVolgorde(a.u.subkop)-kopVolgorde(b.u.subkop));
+  const dub=dubbelen(state.uitz);
+  const dubSet=new Set(dub.flat());
+  let html=`<details open><summary>Afwijkingen voor de inrichting (${state.uitz.length})</summary><p class="hint" style="margin-top:8px">Pas de tekst aan of verwijder een regel als die niet klopt.</p>`;
+  if(dub.length) html+=`<div class="msg warn">Mogelijk dubbel: ${dub.map(([a,b])=>`“${esc(state.uitz[a].subkop)}” en “${esc(state.uitz[b].subkop)}”`).join("; ")}. Controleer of het om dezelfde regeling gaat en verwijder er dan één.</div>`;
+  for(const h of HOOFDSTUKKEN){
+    const items=idx.filter(x=>hoofdstukVan(x.u.subkop)===h); if(!items.length) continue;
+    html+=`<div class="uitz-group"><h3>${esc(h)}</h3>`+items.map(({u,i})=>`<div class="uitz"${dubSet.has(i)?' style="outline:2px solid var(--tegen);outline-offset:4px;border-radius:4px"':""}><div><select data-kop="${i}" aria-label="Subkop">${opties(u.subkop)}</select><div class="uitleg">${esc(UITLEG[u.subkop]||"")}</div>${groep(u)==="essentieel"?`<span class="pill pill-ess" style="display:inline-block;margin-top:6px">Essentieel</span>`:`<select class="toep" data-utoep="${i}" aria-label="Toepassing" style="margin-top:6px"><option value="structureel"${u.toepassing!=="voorwaardelijk"?" selected":""}>Structureel</option><option value="voorwaardelijk"${u.toepassing==="voorwaardelijk"?" selected":""}>Alleen onder voorwaarden</option></select>`}</div><div><textarea data-afspraak="${i}" aria-label="Afspraak">${esc(u.afspraak)}</textarea><div class="uitleg" style="margin-top:8px">Voorwaarden</div><textarea class="voorw" data-voorw="${i}" aria-label="Voorwaarden" placeholder="Voorwaarden (leeg als er geen zijn)">${esc(u.voorwaarden||"")}</textarea>${(u.bronnen||[]).length?`<div class="bronnen">Bron: ${esc(u.bronnen.map(b=>[b.document,b.vindplaats].filter(Boolean).join(", ")).join("; "))}</div>`:""}</div><button class="secondary small" data-del="${i}" aria-label="Verwijder afwijking">Verwijder</button></div>`).join("")+`</div>`;
+  }
+  html+=`<div class="row"><button class="secondary small" id="nieuw">Afwijking toevoegen</button></div></details>`;
+  $("#uitzonderingen").innerHTML=html;
+  document.querySelectorAll("[data-kop]").forEach(s=>s.onchange=e=>{state.uitz[+e.target.dataset.kop].subkop=e.target.value; renderUitz();});
+  document.querySelectorAll("[data-afspraak]").forEach(t=>{ t.oninput=e=>state.uitz[+e.target.dataset.afspraak].afspraak=e.target.value; t.onchange=()=>renderUitz(); });
+  document.querySelectorAll("[data-utoep]").forEach(sel=>sel.onchange=e=>{ state.uitz[+e.target.dataset.utoep].toepassing=e.target.value; });
+  document.querySelectorAll("[data-voorw]").forEach(t=>t.oninput=e=>state.uitz[+e.target.dataset.voorw].voorwaarden=e.target.value);
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{state.uitz.splice(+e.target.dataset.del,1); renderUitz(); renderOverzicht();});
+  $("#nieuw").onclick=()=>{state.uitz.push({subkop:"Overig / niet in cao",afspraak:"",voorwaarden:null,toepassing:"structureel",bronnen:[{document:"handmatig toegevoegd"}]}); renderUitz(); renderOverzicht(); const t=document.querySelectorAll("[data-afspraak]"); t[t.length-1]?.focus();};
+}
+
+function renderKnoppen(){
+  const open=state.ctrl.filter(c=>!controleGeldig(c)).length;
+  const v=verzamel(state);
+  const openEss=v.openEss.length;
+  $("#pdfInrichting").disabled = openEss>0;
+  $("#pdfAanvulling").hidden = state.scenario===2;
+  $("#pdfAanvulling").disabled = open>0 || v.correcties.length===0;
+  let m="", t="ok";
+  if(openEss){ t="warn"; m=`Beoordeel eerst de ${openEss} essentiële controlepunt(en). Daarna kun je het inrichtingsdocument downloaden.`; }
+  else if(open){ t="warn"; m=`Het inrichtingsdocument kan worden gedownload. Er staan nog ${open} niet-essentiële punt(en) open; die komen onder ‘Nog te beoordelen’.`+(state.scenario===2?"":" De aanvulling kan pas als alles is beoordeeld."); }
+  else if(state.scenario===2) m="Het inrichtingsdocument is klaar. Het samengevoegde document voor HelloFlex (Caoloon-uitdraai met de afwijkingen per hoofdstuk) volgt in de volgende versie.";
+  else if(!v.correcties.length) m="Er zijn geen correcties: het formulier van de opdrachtgever kan zonder aanvulling ter ondertekening naar HelloFlex.";
+  msg("#m3",t,m);
+}
+
+function bestandsnaam(prefix){
+  const k=(state.data.klant.bedrijfsnaam||"opdrachtgever").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_");
+  return `${prefix}_${k}_${state.peildatum||vandaag()}.pdf`;
+}
+function download(bytes,naam){
+  const url=URL.createObjectURL(new Blob([bytes],{type:"application/pdf"}));
+  const a=document.createElement("a"); a.href=url; a.download=naam; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+async function maak(soort){
+  if(typeof PDFLib==="undefined"){ msg("#m3","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
+  try{
+    if(soort==="inrichting") download(await bouwInrichting(PDFLib,state),bestandsnaam("Inrichting"));
+    else download(await bouwAanvulling(PDFLib,state),bestandsnaam("Aanvulling"));
+  }catch(e){ msg("#m3","err",`Het document kon niet worden gemaakt: ${esc(e.message)}`); }
+}
+$("#pdfInrichting").onclick=()=>maak("inrichting");
+$("#pdfAanvulling").onclick=()=>maak("aanvulling");
+</script>
+</body>
+</html>

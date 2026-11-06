@@ -1,0 +1,144 @@
+{
+ "meta": {
+  "schema_versie": "1.2",
+  "bron_type": "sugb",
+  "bron_naam": "Standaard uitvraag Gelijkwaardig Belonen (webformulier)",
+  "bron_datum": "2025-11-27",
+  "peildatum": null,
+  "documenten": [
+   "Webformulier SUGB 27-11-2025",
+   "Sector-cao 2025-2026",
+   "Bedrijfs-CAO Voorbeeld Energie 2025",
+   "Bedrijfseigen regelingen Voorbeeld Energie 2025"
+  ]
+ },
+ "klant": {
+  "bedrijfsnaam": "Voorbeeld Energie N.V.",
+  "kvk_nummer": null,
+  "vestigingsplaats": null,
+  "contactpersoon_naam": null,
+  "contactpersoon_email": null
+ },
+ "cao": {
+  "van_toepassing": true,
+  "naam": "Sector-cao + Bedrijfs-CAO Voorbeeld Energie",
+  "looptijd_van": "2025-01-01",
+  "looptijd_tot": "2026-12-31",
+  "eigen_regeling_naast_cao": true
+ },
+ "cao_keuzes": {
+  "uren_per_week": null,
+  "loontabel": "maand",
+  "dagvenster": null,
+  "ploegendienst": null,
+  "overwerk_inbegrepen_in_salaris": null
+ },
+ "functies": [],
+ "conform_cao": [],
+ "uitzonderingen": [
+  {
+   "subkop": "Standbyvergoeding",
+   "afspraak": "7,5% van het schaalsalaris per volledige consignatieweek (0,6% ma-vr, 1,8% za, 2,7% zon- en feestdagen).",
+   "voorwaarden": "Bij strenge gebondenheid 0,9%, 2,7% en 4,05%. Maximum volgens de overwerkgrens.",
+   "bronnen": [
+    {
+     "document": "Bedrijfs-CAO Voorbeeld Energie 2025",
+     "vindplaats": "art. 3.2"
+    }
+   ]
+  },
+  {
+   "subkop": "Standbyvergoeding",
+   "afspraak": "Consignatievergoeding 7,5% van het schaalsalaris per week consignatie.",
+   "voorwaarden": null,
+   "bronnen": [
+    {
+     "document": "Webformulier SUGB",
+     "vindplaats": "p. 30"
+    }
+   ]
+  },
+  {
+   "subkop": "Overwerktoeslag",
+   "afspraak": "Geen vergoeding voor overwerk en verschoven werktijd vanaf salarisschaal A12.",
+   "voorwaarden": "Werkgever kan een uitzondering toekennen.",
+   "bronnen": [
+    {
+     "document": "Bedrijfs-CAO Voorbeeld Energie 2025",
+     "vindplaats": "hfst. 2"
+    }
+   ]
+  },
+  {
+   "subkop": "Jubileum uitkeringen",
+   "afspraak": "Gratificatie bij 25 en 40 dienstjaren.",
+   "voorwaarden": "Bij 25 jaar 1/2 maandsalaris, bij 40 jaar een heel maandsalaris; dienstjaren bij Voorbeeld Energie.",
+   "bronnen": [
+    {
+     "document": "Sector-cao",
+     "vindplaats": "art. 7.4"
+    }
+   ]
+  },
+  {
+   "subkop": "Vakantiedagen",
+   "afspraak": "Bovenwettelijk verlof via het Benefit Budget (2%).",
+   "voorwaarden": null,
+   "bronnen": [
+    {
+     "document": "Sector-cao",
+     "vindplaats": "art. 6.1"
+    }
+   ]
+  }
+ ],
+ "te_controleren": [
+  {
+   "subkop": "Zorgverzekeringvergoeding",
+   "signaal": "voorwaarde_toetsen",
+   "waarde_in_bron": "€ 31,67 bruto per maand bijdrage in de zorgverzekering.",
+   "waarde_cao": "€ 380 per jaar (€ 31,67 per maand).",
+   "reden": "Alleen bij deelname aan de collectieve verzekering van Voorbeeld Energie; een uitzendkracht kan daar mogelijk niet aan deelnemen.",
+   "bronnen": [
+    {
+     "document": "Webformulier SUGB",
+     "vindplaats": "p. 31-32",
+     "tekst": "€ 31,67 per maand, naar rato; alleen bij collectieve verzekering Voorbeeld Energie met aanvullende verzekering (niet zijnde tandarts)."
+    },
+    {
+     "document": "Sector-cao",
+     "vindplaats": "art. 6.2",
+     "tekst": "€ 380 per jaar, alleen bij deelname collectieve verzekering met aanvullende verzekering (met ster); naar rato niet genoemd."
+    }
+   ]
+  },
+  {
+   "subkop": "Individueel keuze budget (IKB)",
+   "signaal": "tegenstrijdig",
+   "waarde_in_bron": "1,8% van het maandsalaris + vakantiegeld als Bijdrage Benefit Budget.",
+   "waarde_cao": "8% vakantie-uitkering + 1,8% bijdrage + 2% bovenwettelijk verlof + 0,8% boven overwerkgrens.",
+   "reden": "Opbouw van het Benefit Budget verschilt tussen formulier en cao.",
+   "bronnen": [
+    {
+     "document": "Webformulier SUGB",
+     "vindplaats": "p. 41",
+     "tekst": "2% van maandsalaris; anders: 1,8% van het maandsalaris + vakantiegeld."
+    },
+    {
+     "document": "Sector-cao",
+     "vindplaats": "art. 6.1",
+     "tekst": "Vakantie-uitkering 8%, bijdrage 1,8%, bovenwettelijk verlof basis 2%, boven overwerkgrens 0,8%."
+    }
+   ]
+  },
+  {
+   "subkop": "Bijzonder verlof",
+   "signaal": "onduidelijk",
+   "waarde_in_bron": "Bijzonder verlof volgens cao.",
+   "waarde_cao": null,
+   "reden": "Omvang niet in formulier.",
+   "bronnen": []
+  }
+ ],
+ "ontbrekend": []
+}

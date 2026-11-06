@@ -1,0 +1,7 @@
+{
+  "name": "beloningsgenerator",
+  "private": true,
+  "description": "Beloningsgenerator IU Groep: inlenersinformatie vastleggen voor gelijkwaardige beloning (WTTA).",
+  "scripts": { "test": "node tests/run.cjs" },
+  "devDependencies": { "pdf-lib": "1.17.1" }
+}

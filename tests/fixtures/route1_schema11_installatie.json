@@ -1,0 +1,93 @@
+{
+ "meta": {
+  "schema_versie": "1.1",
+  "bron_type": "sugb",
+  "bron_naam": "Standaard uitvraag Gelijkwaardige Beloning (SUGB)",
+  "bron_datum": "2026-10-13",
+  "peildatum": null
+ },
+ "klant": {
+  "bedrijfsnaam": "Voorbeeld Installatie BV",
+  "kvk_nummer": null,
+  "vestigingsplaats": null,
+  "contactpersoon_naam": "Contactpersoon Voorbeeld",
+  "contactpersoon_email": "hr@voorbeeld.example"
+ },
+ "cao": {
+  "van_toepassing": true,
+  "naam": "M&T technisch installatiebedrijf",
+  "looptijd_van": "2026-02-01",
+  "looptijd_tot": "2028-01-31",
+  "eigen_regeling_naast_cao": true
+ },
+ "cao_keuzes": {
+  "uren_per_week": 40,
+  "loontabel": "maand",
+  "dagvenster": null,
+  "ploegendienst": null,
+  "overwerk_inbegrepen_in_salaris": null
+ },
+ "functies": [
+  {
+   "functienaam": "Magazijnmedewerker",
+   "schaal_of_functiegroep": null,
+   "opmerking": null
+  }
+ ],
+ "conform_cao": [
+  "Initiële inschaling",
+  "Vakantiebijslag",
+  "Loondoorbetaling bij ziekte",
+  "Vakantiedagen",
+  "Feestdagen"
+ ],
+ "uitzonderingen": [
+  {
+   "subkop": "Standbyvergoeding",
+   "afspraak": "Monteurs ontvangen per servicedienstdag bruto €35,30 op werkdagen, €43,54 op zaterdag, €50,59 op zondag en €70,59 op feestdagen.",
+   "bron_vindplaats": "p. 10, 15"
+  },
+  {
+   "subkop": "Reiskostenvergoeding",
+   "afspraak": "Voor woon-werkverkeer met eigen vervoer geldt €0,23 per kilometer; de eerste 15 kilometer zijn voor eigen rekening.",
+   "bron_vindplaats": "p. 13"
+  },
+  {
+   "subkop": "Jubileum uitkeringen",
+   "afspraak": "Bij 12,5, 25 en 40 dienstjaren €500, €1.000 en €1.500.",
+   "bron_vindplaats": "p. 20"
+  },
+  {
+   "subkop": "Bijzonder verlof",
+   "afspraak": "Twee aaneengesloten dagen bij overlijden van ouders, broers of zussen.",
+   "bron_vindplaats": "p. 24"
+  }
+ ],
+ "te_controleren": [
+  {
+   "subkop": "Pensioen",
+   "signaal": "tegenstrijdig",
+   "waarde_in_bron": "Werkgeverspremie: 63,26% van de pensioengrondslag.",
+   "waarde_cao": "Totale premie 27,98%; werkgeversaandeel 17,70% van de pensioengrondslag.",
+   "reden": "Werkgeversaandeel verward met premiepercentage."
+  },
+  {
+   "subkop": "Overwerktoeslag",
+   "signaal": "mogelijk_onder_cao",
+   "waarde_in_bron": "Gemaakte uren worden opgeteld bij vakantieuren.",
+   "waarde_cao": "Toeslagen van 28,44%, 46,56% of 84,43% bij maandloon.",
+   "reden": "Geen toeslag gewaarborgd."
+  },
+  {
+   "subkop": "Aanvulling wazo verlof",
+   "signaal": "bijlage_ontbreekt",
+   "waarde_in_bron": "Bijlage toegevoegd",
+   "waarde_cao": "n.v.t.",
+   "reden": "Bijlage niet meegeleverd."
+  }
+ ],
+ "ontbrekend": [
+  "klant.vestigingsplaats",
+  "cao_keuzes.dagvenster"
+ ]
+}
