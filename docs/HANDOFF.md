@@ -9,8 +9,9 @@ Lees eerst `CLAUDE.md` en `README.md`. Dit document vult alleen aan wat daar nie
 4. Meerdere bronnen per klant: formulier = checklist/verklaring, cao en regelingen leidend voor bedragen en voorwaarden; verschillen → controlepunt "tegenstrijdig"; voorwaarden die een uitzendkracht mogelijk niet haalt → "voorwaarde toetsen".
 5. Route "Formulier": klant tekent zijn eigen formulier opnieuw; generator maakt inrichtingsdocument + zo nodig aanvulling.
 6. Route "Alleen een cao": cao-keuzes, functies en KvK zitten niet in de uitvraag (komen uit Caoloon / niet nodig).
-7. Prioritering: 11 essentiële elementen; inrichtingsdocument downloadbaar na beoordeling daarvan; voorwaardelijke regelingen kort in het document, volledig in de bijlage.
+7. Prioritering: 11 essentiële elementen; inrichtingsdocument downloadbaar na beoordeling daarvan; voorwaardelijke regelingen in hoofdstuk 3 met voorwaarden en bron, net als de andere hoofdstukken (geen aparte bijlage meer).
 8. Geen scenarionummers in de UI.
+9. Geen blokkade meer op oude formulieren of beloningsregister-exports; alleen een waarschuwing. Beloningsregister-exports zijn bron_type "beloningsregister", ongeacht de datum.
 
 ## Open werk (op prioriteit)
 1. **Samengevoegd document route "Alleen een cao"**: Caoloon-uitdraai (PDF) inlezen met pdf.js, koppen als volledige regel matchen (`matching_regels_generator` in het schema), per afwijking na het onderdeel een pagina "Afwijking klant" invoegen, pagina 1 = samenvatting met akkoord en tabel "afwijking → pagina", functie/schaal van pagina 1 van de uitdraai halen. Klaar als: twee uitdraaien van verschillende cao's correct worden samengevoegd. **Wacht op een tweede Caoloon-uitdraai van Loes** (eerste was cao M&T).

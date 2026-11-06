@@ -8,7 +8,8 @@
       "bron_naam": "string | null — naam van tool of uitlener waar het formulier vandaan komt, bijv. 'wijzerbelonen.nl'",
       "bron_datum": "string YYYY-MM-DD | null — datum waarop het bronformulier is ingevuld of ondertekend",
       "peildatum": "string YYYY-MM-DD | null — vult de intercedent in de generator in",
-      "documenten": "array van strings: namen van alle aangeleverde documenten"
+      "documenten": "array van strings: namen van alle aangeleverde documenten",
+      "cao_referentie": "boolean: false als er een cao geldt maar geen cao-tekst of Caoloon-uitdraai is aangeleverd"
     },
     "klant": {
       "bedrijfsnaam": "string | null",

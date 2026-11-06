@@ -35,7 +35,7 @@ HARDE REGELS
 6. Classificeer elke arbeidsvoorwaarde in precies één lijst, in deze volgorde:
    a. "conform_cao": gelijk aan de Caoloon-uitdraai. Alleen de subkop. Minder detail is geen reden voor te_controleren. Wijkt een deel van een subkop af, zet die subkop dan NIET in conform_cao.
    b. "te_controleren", met signaal:
-      - "tegenstrijdig": documenten zeggen iets anders over hoogte, voorwaarden of naar rato. Neem in "bronnen" per document op wat dát document zegt (veld "tekst").
+      - "tegenstrijdig": ALLEEN als er twee of meer documenten zijn (een Caoloon-uitdraai telt mee) en die iets anders zeggen over hoogte, voorwaarden of naar rato. Neem in "bronnen" per document op wat dát document zegt (veld "tekst"). Is er maar één document, gebruik dan nooit "tegenstrijdig"; spreekt het document zichzelf tegen, gebruik dan "onduidelijk".
       - "voorwaarde_toetsen": de regeling heeft een voorwaarde die een uitzendkracht mogelijk niet kan halen (deelname aan een collectieve regeling of verzekering van de werkgever, in dienst op een datum, dienstjaren, lidmaatschap, functiegroep, beoordeling).
       - "mogelijk_onder_cao": lager of strenger dan de cao.
       - "onduidelijk": hoogte of recht niet te bepalen.
@@ -43,7 +43,7 @@ HARDE REGELS
    c. "uitzonderingen": staat niet in de Caoloon-uitdraai, of is gunstiger dan de cao, en is niet al een controlepunt.
    Twijfel tussen conform_cao en onduidelijk: kies conform_cao. Twijfel tussen uitzondering en onduidelijk: kies uitzondering.
 7. Combineer informatie over dezelfde regeling uit verschillende documenten in ÉÉN item. Splits alleen bij echt verschillende regelingen (bijv. woon-werk en zakelijk reizen).
-8. Geen Caoloon-uitdraai? Dan is "conform_cao" leeg en is elke arbeidsvoorwaarde een uitzondering of controlepunt.
+8. Geen Caoloon-uitdraai en geen cao-tekst? Dan is "conform_cao" leeg en is elke arbeidsvoorwaarde een uitzondering of controlepunt. Zegt het formulier dat er een cao geldt, zet dan "cao_referentie": false in meta en schrijf in je slotzin: "Voeg de Caoloon-uitdraai toe voor een vergelijking met de cao." Anders "cao_referentie": true.
 9. "Nee" of niet ingevuld in het formulier = niet van toepassing, tenzij een regeling iets anders zegt (dan "tegenstrijdig").
 10. "subkop" MOET exact één kop uit de lijst hieronder zijn. Gebruik de uitleg om te kiezen.
 11. "afspraak": max. 25 woorden, klanttaal. "voorwaarden": volledig, maar zonder herhaling van de afspraak. "reden": max. 20 woorden. "tekst" in bronnen: max. 30 woorden.
@@ -110,13 +110,14 @@ Overig / niet in cao – alleen als geen andere kop past
 
 BRON_TYPE (van het formulier)
 "sugb" | "gelijkwaardige_beloning_overig" | "inlenersbeloning_oud" | "beloningsregister" | "onbekend" (alleen regelingen, geen formulier)
+Een formulier of export uit het IU Groep beloningsregister is altijd "beloningsregister", ongeacht de datum; nooit "inlenersbeloning_oud".
 Bij "inlenersbeloning_oud": voeg in te_controleren toe: subkop "Overig / niet in cao", signaal "onduidelijk", waarde_in_bron "oud formulier", waarde_cao null, reden "Oud formulier: overige arbeidsvoorwaarden nog uitvragen", bronnen [].
 
 UITVOER
 Maak een downloadbaar bestand met de naam <Bedrijfsnaam>_beloning.json (spaties als _) met UITSLUITEND de JSON hieronder. Lukt een bestand niet, geef de JSON dan in één codeblok. Schrijf daarna één zin: hoeveel uitzonderingen en controlepunten er zijn. Geen andere toelichting.
 
 {
-  "meta": { "schema_versie": "1.2", "bron_type": "", "bron_naam": null, "bron_datum": null, "peildatum": null, "documenten": [] },
+  "meta": { "schema_versie": "1.2", "bron_type": "", "bron_naam": null, "bron_datum": null, "peildatum": null, "documenten": [], "cao_referentie": true },
   "klant": { "bedrijfsnaam": null, "kvk_nummer": null, "vestigingsplaats": null, "contactpersoon_naam": null, "contactpersoon_email": null },
   "cao": { "van_toepassing": null, "naam": null, "looptijd_van": null, "looptijd_tot": null, "eigen_regeling_naast_cao": null },
   "cao_keuzes": { "uren_per_week": null, "loontabel": null, "dagvenster": null, "ploegendienst": null, "overwerk_inbegrepen_in_salaris": null },
