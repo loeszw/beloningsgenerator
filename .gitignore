@@ -3,3 +3,4 @@ tests/out/
 *.pdf
 !tests/fixtures/*.pdf
 .DS_Store
+docs/assistent-instructies.md

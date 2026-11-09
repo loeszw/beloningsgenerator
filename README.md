@@ -9,9 +9,9 @@ De hele tool is één bestand: [`index.html`](index.html). Alles draait in de br
 | Route | Wanneer | Wat de tool maakt |
 |---|---|---|
 | **Formulier van de opdrachtgever** | De opdrachtgever heeft een formulier (bijv. wijzerbelonen.nl) en/of regelingen aangeleverd, of heeft een eigen loongebouw. | Inrichtingsdocument (intern) en, bij correcties, een aanvulling die met het formulier in HelloFlex wordt getekend. |
-| **Alleen een cao** | Er is nog geen formulier; de cao (Caoloon) is de basis. | Invulbare uitvraag "Geeft u meer dan de cao?", inlezen van de ingevulde uitvraag, inrichtingsdocument. |
+| **Alleen een cao** | Er is nog geen formulier; de cao (Caoloon) is de basis. | Invulbare uitvraag "Geeft u meer dan de cao?". De ingevulde uitvraag wordt ingelezen via het sleepvak van de route "Formulier van de opdrachtgever". |
 
-De omzetting van formulieren gebeurt met een vaste ChatGPT-assistent: zie [`docs/assistent-instructies.md`](docs/assistent-instructies.md). Het gedeelde veldformaat staat in [`docs/veldschema.json`](docs/veldschema.json).
+De omzetting van formulieren gebeurt met een vaste ChatGPT-assistent. De instructies (prompt) van die assistent staan bewust niet in deze repository. Het gedeelde veldformaat staat in [`docs/veldschema.json`](docs/veldschema.json).
 
 ## Lokaal gebruiken
 

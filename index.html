@@ -145,8 +145,8 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
   <p class="lead">Leg de arbeidsvoorwaarden van de opdrachtgever vast en maak de documenten voor de backoffice en HelloFlex. Alles blijft in deze browser; er wordt niets opgeslagen of verstuurd.</p>
 
   <div class="modes" role="tablist" aria-label="Kies de situatie">
-    <button role="tab" aria-selected="true" data-mode="1">Formulier van de opdrachtgever<small>De opdrachtgever heeft een formulier ingevuld, of heeft geen cao</small></button>
-    <button role="tab" aria-selected="false" data-mode="2">Alleen een cao<small>Er is nog geen formulier; de cao is de basis</small></button>
+    <button role="tab" aria-selected="true" data-mode="1">Formulier van de opdrachtgever<small>Formulier, regelingen of een ingevulde uitvraag inlezen en controleren</small></button>
+    <button role="tab" aria-selected="false" data-mode="2">Alleen een cao<small>Nog geen formulier: maak een uitvraag voor de opdrachtgever</small></button>
   </div>
 
   <section class="step mode2" id="b1">
@@ -174,22 +174,12 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
     </div>
   </section>
 
-  <section class="step mode2" id="b2">
-    <div class="step-nr">2</div>
-    <div class="step-body">
-      <h2>Lees de ingevulde uitvraag in</h2>
-      <p class="hint">Stuur de uitvraag naar de opdrachtgever. Krijg je hem ingevuld terug, kies dan hier het bestand.</p>
-      <label class="f">Ingevulde uitvraag (PDF)<input id="b_upload" type="file" accept="application/pdf"></label>
-      <div id="mb2"></div>
-    </div>
-  </section>
-
   <section class="step mode1" id="s1">
     <div class="step-nr">1</div>
     <div class="step-body">
       <h2>Lees het bestand van de assistent in</h2>
-      <p class="hint">Sleep het bestand dat de beloningsassistent in ChatGPT maakte hierheen, of klik om het te kiezen.</p>
-      <label class="drop" id="drop"><input type="file" id="bestand" accept=".json,.txt,application/json,text/plain" hidden><strong>Sleep het bestand hierheen</strong><span>of klik om een bestand te kiezen</span></label>
+      <p class="hint">Sleep het bestand van de beloningsassistent of de ingevulde uitvraag (PDF) hierheen, of klik om het te kiezen.</p>
+      <label class="drop" id="drop"><input type="file" id="bestand" accept=".json,.txt,.pdf,application/json,text/plain,application/pdf" hidden><strong>Sleep het bestand hierheen</strong><span>of klik om een bestand te kiezen</span></label>
       <details><summary>Of plak de tekst</summary>
         <textarea id="bron" spellcheck="false" style="margin-top:10px"></textarea>
         <div class="row"><button id="lees">Tekst inlezen</button></div>
@@ -199,7 +189,7 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
     </div>
   </section>
 
-  <section class="step locked" id="s2">
+  <section class="step mode1 locked" id="s2">
     <div class="step-nr">2</div>
     <div class="step-body">
       <h2>Controleer gegevens en controlepunten</h2>
@@ -210,7 +200,7 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
     </div>
   </section>
 
-  <section class="step locked" id="s3">
+  <section class="step mode1 locked" id="s3">
     <div class="step-nr">3</div>
     <div class="step-body">
       <h2>Maak de documenten</h2>
@@ -619,29 +609,43 @@ async function bouwAanvulling(L,state){
 
 /* ---------- Scenario 2: uitvraag ---------- */
 const MEER=[
- {id:"loon",subkop:"Loon",label:"Loon",hint:"Hoger loon dan de cao-schaal, een eigen loontabel of persoonlijke toeslagen."},
- {id:"eindejaar",subkop:"Eindejaarsuitkering",label:"Eindejaarsuitkering of dertiende maand"},
- {id:"bonus",subkop:"Variabele uitkeringen",label:"Bonus, winstdeling of prestatie-uitkering"},
- {id:"eenmalig",subkop:"Eenmalige uitkeringen",label:"Eenmalige uitkeringen",hint:"Bovenop wat de cao al afspreekt."},
- {id:"jubileum",subkop:"Jubileum uitkeringen",label:"Jubileumuitkering"},
- {id:"pensioen",subkop:"Pensioen",label:"Pensioen",hint:"Een hogere werkgeversbijdrage of een aanvullende regeling."},
- {id:"ziekte",subkop:"Loondoorbetaling bij ziekte",label:"Loondoorbetaling bij ziekte",hint:"Een hoger percentage of minder wachtdagen."},
- {id:"vakantie",subkop:"Vakantiedagen",label:"Vakantiedagen",hint:"Extra dagen, bijvoorbeeld naar leeftijd of dienstjaren."},
- {id:"adv",subkop:"ADV/ATV regeling bijzonderheden",label:"ADV of ATV"},
- {id:"feestdagen",subkop:"Feestdagen",label:"Extra feestdagen of vrije dagen"},
- {id:"bijzonder",subkop:"Bijzonder verlof",label:"Bijzonder verlof",hint:"Bijvoorbeeld bij huwelijk, overlijden of verhuizing."},
- {id:"sluiting",subkop:"Verplicht verlof",label:"Bedrijfssluiting of verplichte vrije dagen",hint:"Welke dagen, en welk verlof de medewerker daarvoor gebruikt."},
- {id:"overwerk",subkop:"Overwerktoeslag",label:"Overwerktoeslag"},
- {id:"onregelmatig",subkop:"Onregelmatigheidstoeslag",label:"Toeslag voor avond-, nacht- of weekendwerk"},
- {id:"ploegen",subkop:"Ploegentoeslag",label:"Ploegentoeslag"},
- {id:"toeslagen",subkop:"Overig / niet in cao",label:"Andere toeslagen",hint:"Bijvoorbeeld stand-by, consignatie, BHV of vuil werk."},
- {id:"reiskosten",subkop:"Reiskostenvergoeding",label:"Reiskostenvergoeding",hint:"Woon-werkverkeer of zakelijke kilometers."},
- {id:"reistijd",subkop:"Reistijdvergoeding",label:"Reistijdvergoeding"},
- {id:"thuiswerk",subkop:"Thuiswerkvergoeding",label:"Thuiswerk- of internetvergoeding"},
- {id:"kosten",subkop:"Overige kosten vergoeding",label:"Kostenvergoedingen",hint:"Bijvoorbeeld kleding, schoenen, gereedschap of maaltijden."},
- {id:"opleiding",subkop:"Duurzame inzetbaarheid",label:"Opleiding en ontwikkeling",hint:"Budget, opleidingsdagen of coaching."},
- {id:"vitaliteit",subkop:"Vitaliteit en gezondheid",label:"Vitaliteit en gezondheid",hint:"Bijvoorbeeld PMO, sportregeling of vitaliteitsbudget."},
- {id:"overig",subkop:"Overig / niet in cao",label:"Overige regelingen",hint:"Alles wat hierboven niet staat."}
+ {blok:"Loon, uitkeringen en ziekte",id:"loon",subkop:"Loon",label:"Loon",hint:"Hoger loon dan de cao-schaal, een eigen loontabel of persoonlijke toeslagen."},
+ {blok:"Loon, uitkeringen en ziekte",id:"verhoging",subkop:"Periodiek verhogingen bijzonderheden",label:"Loonsverhogingen en periodieken",hint:"Verhogingen bovenop de cao, en wanneer ze worden toegekend."},
+ {blok:"Loon, uitkeringen en ziekte",id:"vakantiegeld",subkop:"Vakantiebijslag",label:"Vakantiegeld",hint:"Een hoger percentage of een andere grondslag dan de cao."},
+ {blok:"Loon, uitkeringen en ziekte",id:"eindejaar",subkop:"Eindejaarsuitkering",label:"Eindejaarsuitkering of dertiende maand"},
+ {blok:"Loon, uitkeringen en ziekte",id:"eenmalig",subkop:"Eenmalige uitkeringen",label:"Eenmalige uitkeringen",hint:"Bovenop wat de cao al afspreekt."},
+ {blok:"Loon, uitkeringen en ziekte",id:"bonus",subkop:"Variabele uitkeringen",label:"Bonus, winstdeling of prestatie-uitkering"},
+ {blok:"Loon, uitkeringen en ziekte",id:"jubileum",subkop:"Jubileum uitkeringen",label:"Jubileumuitkering"},
+ {blok:"Loon, uitkeringen en ziekte",id:"ikb",subkop:"Individueel keuze budget (IKB)",label:"Keuzebudget",hint:"IKB, Benefit Budget of vergelijkbaar: hoogte en waaruit het is opgebouwd."},
+ {blok:"Loon, uitkeringen en ziekte",id:"pensioen",subkop:"Pensioen",label:"Pensioen",hint:"Een hogere werkgeversbijdrage of een aanvullende regeling."},
+ {blok:"Loon, uitkeringen en ziekte",id:"ziekte",subkop:"Loondoorbetaling bij ziekte",label:"Loondoorbetaling bij ziekte",hint:"Een hoger percentage of een langere periode dan de cao."},
+ {blok:"Loon, uitkeringen en ziekte",id:"wachtdagen",subkop:"Wachtdagen ziekteverzuim",label:"Wachtdagen bij ziekte",hint:"Minder of geen wachtdagen, of compensatie daarvoor."},
+ {blok:"Vergoedingen",id:"reiskosten",subkop:"Reiskostenvergoeding",label:"Reiskostenvergoeding",hint:"Woon-werkverkeer of zakelijke kilometers."},
+ {blok:"Vergoedingen",id:"mobiliteit",subkop:"Mobiliteitsvergoeding",label:"Mobiliteitsregeling",hint:"Leaseauto, leasefiets of een mobiliteitsbudget."},
+ {blok:"Vergoedingen",id:"reistijd",subkop:"Reistijdvergoeding",label:"Reistijdvergoeding"},
+ {blok:"Vergoedingen",id:"kosten",subkop:"Overige kosten vergoeding",label:"Kostenvergoedingen",hint:"Bijvoorbeeld kleding, schoenen, gereedschap, maaltijden of verblijfkosten."},
+ {blok:"Vergoedingen",id:"thuiswerk",subkop:"Thuiswerkvergoeding",label:"Thuiswerk- of internetvergoeding"},
+ {blok:"Vergoedingen",id:"zorg",subkop:"Zorgverzekeringvergoeding",label:"Bijdrage zorgverzekering",hint:"Ook als die alleen geldt bij deelname aan een collectieve verzekering; vermeld dat dan."},
+ {blok:"Verlof en vrije tijd",id:"vakantie",subkop:"Vakantiedagen",label:"Vakantiedagen",hint:"Extra dagen, bijvoorbeeld naar leeftijd of dienstjaren."},
+ {blok:"Verlof en vrije tijd",id:"adv",subkop:"ADV/ATV regeling bijzonderheden",label:"ADV of ATV"},
+ {blok:"Verlof en vrije tijd",id:"feestdagen",subkop:"Feestdagen",label:"Extra feestdagen of vrije dagen"},
+ {blok:"Verlof en vrije tijd",id:"sluiting",subkop:"Verplicht verlof",label:"Bedrijfssluiting of verplichte vrije dagen",hint:"Welke dagen, en welk verlof de medewerker daarvoor gebruikt."},
+ {blok:"Verlof en vrije tijd",id:"bijzonder",subkop:"Bijzonder verlof",label:"Bijzonder verlof",hint:"Bijvoorbeeld bij huwelijk, overlijden of verhuizing."},
+ {blok:"Verlof en vrije tijd",id:"wazo",subkop:"Aanvulling wazo verlof",label:"Aanvulling op ouderschaps-, geboorte- of zorgverlof"},
+ {blok:"Verlof en vrije tijd",id:"tijdvoortijd",subkop:"Tijd voor tijd",label:"Tijd-voor-tijd",hint:"Overuren of meeruren omzetten in vrije tijd."},
+ {blok:"Verlof en vrije tijd",id:"pauzes",subkop:"Doorbetaling pauzes",label:"Doorbetaalde pauzes"},
+ {blok:"Toeslagen",id:"overwerk",subkop:"Overwerktoeslag",label:"Overwerktoeslag"},
+ {blok:"Toeslagen",id:"onregelmatig",subkop:"Onregelmatigheidstoeslag",label:"Toeslag voor avond-, nacht- of weekendwerk"},
+ {blok:"Toeslagen",id:"ploegen",subkop:"Ploegentoeslag",label:"Ploegentoeslag"},
+ {blok:"Toeslagen",id:"standby",subkop:"Standbyvergoeding",label:"Stand-by of consignatie",hint:"Vergoeding voor beschikbaarheid en toeslag over de uren die dan gewerkt worden."},
+ {blok:"Toeslagen",id:"toeslagen",subkop:"Overig / niet in cao",label:"Andere toeslagen",hint:"Bijvoorbeeld BHV, vuil of zwaar werk, of verschoven diensten."},
+ {blok:"Ontwikkeling en overige regelingen",id:"opleiding",subkop:"Duurzame inzetbaarheid",label:"Opleiding en ontwikkeling",hint:"Budget, opleidingsdagen of coaching."},
+ {blok:"Ontwikkeling en overige regelingen",id:"scholing",subkop:"Verplichte opleidingen",label:"Verplichte scholing",hint:"Bijvoorbeeld VCA: duur, kosten en of het onder werktijd valt."},
+ {blok:"Ontwikkeling en overige regelingen",id:"vitaliteit",subkop:"Vitaliteit en gezondheid",label:"Vitaliteit en gezondheid",hint:"Bijvoorbeeld PMO, sportregeling of vitaliteitsbudget."},
+ {blok:"Ontwikkeling en overige regelingen",id:"verzekeringen",subkop:"Verzekeringen",label:"Verzekeringen",hint:"Bijvoorbeeld een ongevallenverzekering."},
+ {blok:"Ontwikkeling en overige regelingen",id:"sociaal",subkop:"Aanvullende sociale verzekeringen",label:"Aanvullende sociale verzekeringen",hint:"Bijvoorbeeld PAWW, PAZW of WGA-hiaat."},
+ {blok:"Ontwikkeling en overige regelingen",id:"rvu",subkop:"RVU en generatiepact",label:"Vervroegd uittreden of generatiepact"},
+ {blok:"Ontwikkeling en overige regelingen",id:"overig",subkop:"Overig / niet in cao",label:"Overige regelingen",hint:"Alles wat hierboven niet staat."}
 ];
 const naarB64=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 const uitB64=s=>JSON.parse(decodeURIComponent(escape(atob(s))));
@@ -657,10 +661,12 @@ async function bouwUitvraag(L,inv){
 
   p.kop("1. Geeft u meer dan de cao?");
   p.tekst("Kruis alleen aan waar u uw eigen medewerkers méér geeft dan de cao, en beschrijf kort wat en onder welke voorwaarden. Geeft u niet meer, dan laat u het leeg.",{na:8});
+  let blok=null;
   for(const m of MEER){
-    p.ruimte(80);
+    if(m.blok!==blok){ blok=m.blok; p.ruimte(110); p.y-=4; p.tekst(blok,{size:12,bold:true,color:p.ACC,na:6}); }
+    p.ruimte(70);
     p.vinkje(`meer_${m.id}`,m.label,m.hint);
-    p.veld(`toel_${m.id}`,{h:34,multiline:true,indent:18});
+    p.veld(`toel_${m.id}`,{h:28,multiline:true,indent:18});
   }
 
   p.kop("2. Ingevuld door");
@@ -744,7 +750,11 @@ function laadTekst(tekst){
   $("#s2").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
 }
 $("#lees").addEventListener("click",()=>laadTekst($("#bron").value));
-async function laadBestand(f){ if(!f) return; leegGedeeld(); laadTekst(await f.text()); }
+async function laadBestand(f){
+  if(!f) return; leegGedeeld();
+  if(/\.pdf$/i.test(f.name)||f.type==="application/pdf") return laadUitvraagPdf(f);
+  laadTekst(await f.text());
+}
 $("#bestand").addEventListener("change",e=>laadBestand(e.target.files[0]));
 const dz=$("#drop");
 ["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over");}));
@@ -758,10 +768,8 @@ document.querySelectorAll(".modes button").forEach(b=>b.addEventListener("click"
   const m=b.dataset.mode; if(document.body.dataset.mode===m) return;
   document.body.dataset.mode=m;
   document.querySelectorAll(".modes button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
-  $("#s2 .step-nr").textContent=m==="2"?"3":"2";
-  $("#s3 .step-nr").textContent=m==="2"?"4":"3";
   $("#s3hint").textContent=m==="2"?"Het inrichtingsdocument is intern en bevat de afwijkingen bovenop de cao.":"Het inrichtingsdocument is intern. De aanvulling gaat samen met het formulier van de opdrachtgever ter ondertekening naar HelloFlex.";
-  leegGedeeld(); msg("#mb2"); $("#b_upload").value="";
+  leegGedeeld(); msg("#m1"); $("#bestand").value="";
 }));
 
 /* Scenario 2: uitvraag maken */
@@ -785,24 +793,22 @@ $("#b_maak").onclick=async()=>{
   try{
     const k=inv.klant.bedrijfsnaam.replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_");
     download(await bouwUitvraag(PDFLib,inv),`Uitvraag_${k}_${inv.peildatum}.pdf`);
-    msg("#mb1","ok",`Uitvraag gemaakt. Stuur hem naar ${esc(inv.klant.contactpersoon_naam||"de opdrachtgever")} en lees hem in stap 2 in zodra hij terug is.`);
+    msg("#mb1","ok",`Uitvraag gemaakt. Stuur hem naar ${esc(inv.klant.contactpersoon_naam||"de opdrachtgever")}. Krijg je hem ingevuld terug, ga dan naar ‘Formulier van de opdrachtgever’ en sleep hem in het sleepvak.`);
   }catch(e){ msg("#mb1","err",`De uitvraag kon niet worden gemaakt: ${esc(e.message)}`); }
 };
 
-/* Scenario 2: ingevulde uitvraag inlezen */
-$("#b_upload").onchange=async e=>{
-  const f=e.target.files[0]; if(!f) return;
-  leegGedeeld();
-  if(typeof PDFLib==="undefined"){ msg("#mb2","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
+/* Ingevulde uitvraag inlezen (via het sleepvak van ‘Formulier van de opdrachtgever’) */
+async function laadUitvraagPdf(f){
+  if(typeof PDFLib==="undefined"){ msg("#m1","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
   const r=await leesUitvraag(PDFLib,new Uint8Array(await f.arrayBuffer()));
-  if(r.fout){ msg("#mb2","err",esc(r.fout)); return; }
+  if(r.fout){ msg("#m1","err",esc(r.fout)); return; }
   const d=r.data;
   state={scenario:2,data:d,uitz:d.uitzonderingen.map(u=>({...u})),ctrl:d.te_controleren.map(c=>({...c,keuze:standaardKeuze(c,d),tekst:""})),functies:d.functies.map(x=>({...x})),uitlener:r.inv.uitlener,intercedent:r.inv.intercedent,peildatum:r.inv.peildatum};
   const kern=`Uitvraag van ${esc(d.klant.bedrijfsnaam)} ingelezen: ${d.uitzonderingen.length} afwijking(en), ${d.te_controleren.length} controlepunt(en).`+(!d.uitzonderingen.length&&!d.te_controleren.length?" De opdrachtgever geeft niets meer dan de cao.":"");
-  msg("#mb2",r.waarschuwingen.length?"warn":"ok",[kern,...r.waarschuwingen.map(esc)].join("<br>"));
+  msg("#m1",r.waarschuwingen.length?"warn":"ok",[kern,...r.waarschuwingen.map(esc)].join("<br>"));
   zetStap("#s2",true); zetStap("#s3",true); render();
   $("#s2").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
-};
+}
 
 function render(){ renderOverzicht(); renderControles(); renderUitz(); renderKnoppen(); }
 

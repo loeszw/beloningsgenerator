@@ -12,7 +12,7 @@ Taal: alle UI-teksten, documenten en commits in het Nederlands. Typografische aa
 - Privacy is een ontwerpkeuze: geen opslag, geen netwerkverkeer met klantdata, geen analytics.
 
 ## Domein (bronnen van waarheid)
-- Veldformaat: `docs/veldschema.json` (nu 1.2; 1.1 blijft inleesbaar). Wijzig je velden, verhoog dan de versie in schema, `docs/assistent-instructies.md` én `parseBron()`.
+- Veldformaat: `docs/veldschema.json` (nu 1.2; 1.1 blijft inleesbaar). Wijzig je velden, verhoog dan de versie in schema, de assistent-instructies (buiten deze repository) én `parseBron()`.
 - Koppen = Caoloon-koppen (`KOPPEN`); vier extra koppen bestaan niet in Caoloon en landen op "Overige afspraken". `Vakantie` → `Vakantiedagen` via `KOP_ALIAS`.
 - Prioriteit: `ELEMENTEN` (11 essentiële elementen) gaat vóór alles; overige punten zijn *structureel* of *voorwaardelijk* (`VOORW_STD` = standaard per kop). Het inrichtingsdocument mag pas als alle essentiële controlepunten beoordeeld zijn; de aanvulling pas als alles beoordeeld is.
 
