@@ -120,11 +120,11 @@ select.toep{width:auto;padding:2px 6px;font-size:.8rem}
 details{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:12px}
 details summary{cursor:pointer;font-weight:600}
 .small-list{font-size:.9rem;color:var(--muted)}
-.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 36px}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 36px}
 .modes button{background:var(--surface);color:var(--ink);border:2px solid var(--line);text-align:left;padding:12px 16px;font-weight:700;font-size:1.3rem;line-height:1.15}
 .modes button small{display:block;font-family:"Barlow",Arial,sans-serif;font-weight:400;color:var(--muted);font-size:.85rem;margin-top:2px}
 .modes button[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
-body[data-mode="1"] .mode2,body[data-mode="2"] .mode1{display:none}
+body:not([data-mode="u"]) .mode-u,body:not([data-mode="c"]) .mode-c,body:not([data-mode="i"]) .mode-i{display:none}
 .func-row{display:grid;grid-template-columns:1fr 160px auto;gap:8px;margin-bottom:8px;align-items:end}
 fieldset{border:0;padding:0;margin:0 0 18px}
 legend{font-weight:600;margin-bottom:8px;padding:0}
@@ -139,21 +139,22 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
-<body data-mode="1">
+<body data-mode="u">
 <header class="band"><div class="band-in"><img class="logo" id="logo" alt="IU Groep" width="148" height="40"><h1 class="sr-only">Arbeidsvoorwaarden opdrachtgever</h1></div></header>
 <main>
-  <p class="lead">Leg de arbeidsvoorwaarden van de opdrachtgever vast en maak de documenten voor de backoffice en HelloFlex. Alles blijft in deze browser; er wordt niets opgeslagen of verstuurd.</p>
+  <p class="lead">Maak de uitvraag, controleer en leg de arbeidsvoorwaarden vast, en richt in. Alles blijft in deze browser; er wordt niets opgeslagen of verstuurd.</p>
 
-  <div class="modes" role="tablist" aria-label="Kies de situatie">
-    <button role="tab" aria-selected="true" data-mode="1">Formulier van de opdrachtgever<small>Formulier, regelingen of een ingevulde uitvraag inlezen en controleren</small></button>
-    <button role="tab" aria-selected="false" data-mode="2">Alleen een cao<small>Nog geen formulier: maak een uitvraag voor de opdrachtgever</small></button>
+  <div class="modes" role="tablist" aria-label="Kies de stap">
+    <button role="tab" aria-selected="true" data-mode="u">Uitvraag opmaken<small>Uitvraag met cao voor de opdrachtgever</small></button>
+    <button role="tab" aria-selected="false" data-mode="c">Controleren en vastleggen<small>Getekend formulier controleren</small></button>
+    <button role="tab" aria-selected="false" data-mode="i">Inrichten<small>Inrichtingsformulier maken</small></button>
   </div>
 
-  <section class="step mode2" id="b1">
+  <section class="step mode-u" id="b1">
     <div class="step-nr">1</div>
     <div class="step-body">
-      <h2>Maak de uitvraag</h2>
-      <p class="hint">Neem de cao over uit de Caoloon-uitdraai. De opdrachtgever vult alleen in wat hij méér geeft dan de cao.</p>
+      <h2>Maak de uitvraag met de cao</h2>
+      <p class="hint">De tool maakt één document: de invulbare uitvraag met akkoordverklaring, met de Caoloon-uitdraai als bijlage. Zet dat document in HelloFlex klaar voor ondertekening.</p>
       <fieldset><legend>Opdrachtgever</legend><div class="fields">
         <label class="f">Bedrijfsnaam<input id="b_bedrijf" autocomplete="organization"></label>
         <label class="f">Contactpersoon<input id="b_contact"></label>
@@ -168,17 +169,19 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
         <label class="f">Cao<input id="b_cao" placeholder="Bijv. M&amp;T technisch installatiebedrijf"></label>
         <label class="f">Looptijd van<input id="b_van" type="date"></label>
         <label class="f">Looptijd tot<input id="b_tot" type="date"></label>
-      </div></fieldset>
-      <div class="row"><button id="b_maak">Uitvraag maken</button></div>
+      </div>
+      <label class="drop" id="drop_cao" style="margin-top:12px"><input type="file" id="b_caopdf" accept=".pdf,application/pdf" hidden><strong id="drop_cao_t">Sleep de Caoloon-uitdraai hierheen</strong><span>of klik om de PDF te kiezen</span></label>
+      </fieldset>
+      <div class="row"><button id="b_maak">Uitvraag met cao maken</button></div>
       <div id="mb1"></div>
     </div>
   </section>
 
-  <section class="step mode1" id="s1">
+  <section class="step mode-c" id="s1">
     <div class="step-nr">1</div>
     <div class="step-body">
-      <h2>Lees het bestand van de assistent in</h2>
-      <p class="hint">Sleep het bestand van de beloningsassistent of de ingevulde uitvraag (PDF) hierheen, of klik om het te kiezen.</p>
+      <h2>Lees het getekende formulier in</h2>
+      <p class="hint">Sleep het bestand van de beloningsassistent of de getekende uitvraag uit HelloFlex hierheen.</p>
       <label class="drop" id="drop"><input type="file" id="bestand" accept=".json,.txt,.pdf,application/json,text/plain,application/pdf" hidden><strong>Sleep het bestand hierheen</strong><span>of klik om een bestand te kiezen</span></label>
       <details><summary>Of plak de tekst</summary>
         <textarea id="bron" spellcheck="false" style="margin-top:10px"></textarea>
@@ -189,27 +192,54 @@ legend{font-weight:600;margin-bottom:8px;padding:0}
     </div>
   </section>
 
-  <section class="step mode1 locked" id="s2">
+  <section class="step mode-c locked" id="s2">
     <div class="step-nr">2</div>
     <div class="step-body">
-      <h2>Controleer gegevens en controlepunten</h2>
-      <p class="hint">Leg per controlepunt vast wat de opdrachtgever heeft geantwoord. Bij ‘mogelijk onder cao’ staat standaard ‘cao geldt’ geselecteerd.</p>
+      <h2>Controleer op tegenstrijdigheden en ‘mogelijk onder cao’</h2>
+      <p class="hint">Is er een tegenstrijdigheid? Overleg met de klant; die past het formulier aan en tekent opnieuw. Leg hier vast wat geldt.</p>
       <div id="overzicht"></div>
       <div id="controles"></div>
       <div id="uitzonderingen"></div>
     </div>
   </section>
 
-  <section class="step mode1 locked" id="s3">
+  <section class="step mode-c locked" id="s3">
     <div class="step-nr">3</div>
     <div class="step-body">
-      <h2>Maak de documenten</h2>
-      <p class="hint" id="s3hint">Het inrichtingsdocument is intern. De aanvulling gaat samen met het formulier van de opdrachtgever ter ondertekening naar HelloFlex.</p>
-      <div class="row">
-        <button id="pdfInrichting">Inrichtingsdocument downloaden</button>
-        <button id="pdfAanvulling" class="secondary">Aanvulling downloaden</button>
-      </div>
+      <h2>Leg de arbeidsvoorwaarden vast</h2>
+      <p class="hint">Het vastleggingsdocument bevat de definitieve arbeidsvoorwaarden met voorwaarden en bron, en de controle. Zet het in HelloFlex; de backoffice gebruikt het bij ‘Inrichten’.</p>
+      <div class="row"><button id="pdfVastlegging">Vastleggingsdocument downloaden</button></div>
       <div id="m3"></div>
+    </div>
+  </section>
+
+  <section class="step mode-i" id="i1">
+    <div class="step-nr">1</div>
+    <div class="step-body">
+      <h2>Lees het vastleggingsdocument in</h2>
+      <p class="hint">Sleep het vastleggingsdocument uit HelloFlex hierheen.</p>
+      <label class="drop" id="drop_i"><input type="file" id="bestand_i" accept=".pdf,application/pdf" hidden><strong>Sleep het vastleggingsdocument hierheen</strong><span>of klik om het te kiezen</span></label>
+      <div id="mi1"></div>
+    </div>
+  </section>
+
+  <section class="step mode-i locked" id="i2">
+    <div class="step-nr">2</div>
+    <div class="step-body">
+      <h2>Bepaal de inrichting</h2>
+      <p class="hint">Begin bij de essentiële elementen. Regelingen ‘alleen onder voorwaarden’ staan standaard op ‘per geval bepalen door de backoffice’.</p>
+      <div id="i_overzicht"></div>
+      <div id="i_controles"></div>
+      <div id="i_uitz"></div>
+    </div>
+  </section>
+
+  <section class="step mode-i locked" id="i3">
+    <div class="step-nr">3</div>
+    <div class="step-body">
+      <h2>Maak het inrichtingsformulier</h2>
+      <div class="row"><button id="pdfInrichting">Inrichtingsformulier downloaden</button></div>
+      <div id="mi3"></div>
     </div>
   </section>
 </main>
@@ -468,11 +498,11 @@ class Pdf{
     this.y-=15;
     if(hint){ this.page.drawText(clean(hint),{x:this.M+18,y:this.y-8,size:8.5,font:this.font,color:this.MUTED}); this.y-=12; }
   }
-  afronden(){
-    const p=this.doc.getPages();
+  afronden(totaal){
+    const p=this.doc.getPages(); const n=totaal||p.length;
     p.forEach((pg,i)=>{
       pg.drawRectangle({x:0,y:0,width:this.PW,height:38,color:this.INK});
-      const pag=`     Pagina ${i+1} van ${p.length}`, maxW=this.W-70;
+      const pag=`     Pagina ${i+1} van ${n}`, maxW=this.W-70;
       let basis=clean(`${this.voet}${this.merk?" - "+this.merk:""}`);
       while(basis.length>10 && this.font.widthOfTextAtSize(basis+pag,8)>maxW) basis=basis.slice(0,-2).trimEnd()+"…";
       pg.drawText(basis.replace(/…+$/,"…")+pag,{x:this.M,y:15,size:8,font:this.font,color:this.WIT});
@@ -490,9 +520,9 @@ async function maakPdf(L,voet,merk){
 
 async function bouwInrichting(L,state){
   const d=state.data, v=verzamel(state);
-  const p=await maakPdf(L,`Inrichtingsdocument ${d.klant.bedrijfsnaam||""} - intern, niet naar opdrachtgever`,state.uitlener);
-  p.doc.setTitle(`Inrichtingsdocument ${d.klant.bedrijfsnaam||""}`);
-  p.titel("Inrichtingsdocument gelijkwaardige beloning", v.openEss.length?`CONCEPT - nog ${v.openEss.length} essentieel controlepunt(en) open`:v.open.length?`Peildatum ${nlDatum(state.peildatum)} - ${v.open.length} niet-essentieel punt(en) nog te beoordelen`:`Peildatum ${nlDatum(state.peildatum)}`);
+  const p=await maakPdf(L,`Inrichtingsformulier ${d.klant.bedrijfsnaam||""} - intern`,state.uitlener);
+  p.doc.setTitle(`Inrichtingsformulier ${d.klant.bedrijfsnaam||""}`);
+  p.titel("Inrichtingsformulier gelijkwaardige beloning", v.openEss.length?`CONCEPT - nog ${v.openEss.length} essentieel controlepunt(en) open`:v.open.length?`Peildatum ${nlDatum(state.peildatum)} - ${v.open.length} niet-essentieel punt(en) nog te beoordelen`:`Peildatum ${nlDatum(state.peildatum)}`);
   p.kop("Gegevens");
   p.kv("Opdrachtgever",d.klant.bedrijfsnaam);
   if(d.klant.kvk_nummer) p.kv("KvK-nummer",d.klant.kvk_nummer);
@@ -501,6 +531,7 @@ async function bouwInrichting(L,state){
   p.kv("Intercedent",state.intercedent);
   p.kv("Bronformulier",`${d.meta.bron_naam||d.meta.bron_type}, ingevuld ${nlDatum(d.meta.bron_datum)}`);
   if(d.meta.ingevuld_door) p.kv("Ingevuld door",d.meta.ingevuld_door);
+  if(state.vastgelegd_op) p.kv("Vastgelegd op",nlDatum(state.vastgelegd_op));
   p.kv("Peildatum",nlDatum(state.peildatum));
   p.kv("Cao",d.cao.van_toepassing?`${d.cao.naam||"—"} (${nlDatum(d.cao.looptijd_van)} t/m ${nlDatum(d.cao.looptijd_tot)})`:"Geen cao, eigen loongebouw");
   p.kv("Eigen regeling naast cao",d.cao.eigen_regeling_naast_cao===true?"Ja":d.cao.eigen_regeling_naast_cao===false?"Nee":"—");
@@ -582,29 +613,112 @@ async function bouwInrichting(L,state){
   return p.doc.save();
 }
 
-async function bouwAanvulling(L,state){
-  const d=state.data, v=verzamel(state);
-  const naam=d.klant.bedrijfsnaam||"opdrachtgever";
-  const p=await maakPdf(L,`Aanvulling arbeidsvoorwaarden ${naam}`,state.uitlener);
-  p.doc.setTitle(`Aanvulling arbeidsvoorwaarden ${naam}`);
-  p.titel("Aanvulling op het formulier arbeidsvoorwaarden",d.klant.kvk_nummer?`${naam}, KvK ${d.klant.kvk_nummer}`:naam);
-  p.tekst(`Deze aanvulling hoort bij het formulier “${d.meta.bron_naam||"arbeidsvoorwaarden"}” dat ${naam} op ${nlDatum(d.meta.bron_datum)} heeft ingevuld. Bij de controle van dat formulier zijn de onderstaande punten met u afgestemd. Het formulier en deze aanvulling worden samen ter ondertekening aangeboden.`,{na:8});
-  p.kop("Afgestemde punten");
-  for(const c of v.correcties){
-    p.subkop(c.subkop);
-    p.kv("In het formulier",c.inFormulier,120);
-    p.kv("Wat geldt",c.geldt,120);
-    p.y-=4;
+
+/* ---------- Vastleggen en overdracht naar inrichten ---------- */
+const BLOKKEREND=new Set(["mogelijk_onder_cao","tegenstrijdig"]);
+function geldigInFase(c,fase){
+  if(fase==="controle"){ if(!BLOKKEREND.has(c.signaal)) return true; return controleGeldig(c); }
+  return controleGeldig(c);
+}
+function maakVastlegging(state){
+  const d=state.data;
+  const bt=b=>(b||[]).map(x=>[kortDoc(x.document),x.vindplaats].filter(Boolean).join(", ")).filter(Boolean).join("; ");
+  const av=[], controle=[], info=[];
+  for(const u of state.uitz) if((u.afspraak||"").trim()) av.push({subkop:u.subkop,afspraak:u.afspraak.trim(),voorwaarden:(u.voorwaarden||"").trim(),bron:bt(u.bronnen),toepassing:u.toepassing});
+  for(const c of state.ctrl){
+    const toel=(c.tekst||"").trim();
+    if(c.signaal==="voorwaarde_toetsen"){ av.push({subkop:c.subkop,afspraak:c.waarde_in_bron,voorwaarden:c.reden||"",bron:bt(c.bronnen),toepassing:c.toepassing,te_toetsen:true}); continue; }
+    if(!BLOKKEREND.has(c.signaal)){ info.push({subkop:c.subkop,signaal:c.signaal,waarde_in_bron:c.waarde_in_bron,reden:c.reden||"",notitie:toel}); continue; }
+    let besluit="Open";
+    if(c.keuze==="cao"){ besluit="Cao geldt"; av.push({subkop:c.subkop,afspraak:`Cao: ${c.waarde_cao||"cao-bepaling"}`,voorwaarden:"",bron:"cao",toepassing:c.toepassing}); }
+    else if(c.keuze==="bron"){ besluit="Formulier klopt"; av.push({subkop:c.subkop,afspraak:c.waarde_in_bron,voorwaarden:toel,bron:bt(c.bronnen)||"formulier",toepassing:c.toepassing}); }
+    else if(String(c.keuze).startsWith("bronidx:")){ const b=(c.bronnen||[])[+c.keuze.split(":")[1]]||{}; besluit=`Klopt: ${kortDoc(b.document)}`; av.push({subkop:c.subkop,afspraak:toel||b.tekst||"",voorwaarden:"",bron:[kortDoc(b.document),b.vindplaats].filter(Boolean).join(", "),toepassing:c.toepassing}); }
+    else if(c.keuze==="correctie"){ besluit="Opdrachtgever past het formulier aan"; av.push({subkop:c.subkop,afspraak:toel,voorwaarden:"",bron:"aangepast door de opdrachtgever",toepassing:c.toepassing}); }
+    else if(c.keuze==="vervalt"){ besluit="Vervalt"; }
+    controle.push({subkop:c.subkop,signaal:c.signaal,waarde_in_bron:c.waarde_in_bron,waarde_cao:c.waarde_cao||null,besluit,toelichting:toel});
   }
-  if(d.cao.van_toepassing){
-    p.kop("Uitgangspunt");
-    p.tekst(`Voor de uitzendkracht hanteert ${state.uitlener} minimaal de cao ${d.cao.naam||""}. Waar het formulier een regeling noemt die lager is dan de cao, geldt de cao-bepaling, tenzij u een gunstigere regeling opgeeft.`);
+  return {v:1,meta:d.meta,klant:d.klant,cao:d.cao,cao_keuzes:d.cao_keuzes||{},functies:state.functies||[],conform_cao:d.conform_cao||[],ontbrekend:d.ontbrekend||[],
+    uitlener:state.uitlener,intercedent:state.intercedent,peildatum:state.peildatum,vastgelegd_op:state.vastgelegd_op||new Date().toISOString().slice(0,10),
+    arbeidsvoorwaarden:av,controle,ter_info:info};
+}
+async function bouwVastlegging(L,V){
+  const naam=V.klant.bedrijfsnaam||"opdrachtgever";
+  const p=await maakPdf(L,`Vastlegging arbeidsvoorwaarden ${naam}`,V.uitlener);
+  p.doc.setTitle(`Vastlegging arbeidsvoorwaarden ${naam}`);
+  p.titel("Vastlegging arbeidsvoorwaarden",`${naam} - vastgelegd op ${nlDatum(V.vastgelegd_op)}`);
+  p.kop("Gegevens");
+  p.kv("Opdrachtgever",naam);
+  if(V.klant.kvk_nummer) p.kv("KvK-nummer",V.klant.kvk_nummer);
+  p.kv("Uitlener",V.uitlener); p.kv("Intercedent",V.intercedent);
+  p.kv("Bronnen",(V.meta.documenten&&V.meta.documenten.length?V.meta.documenten.map(kortDoc).join("; "):(V.meta.bron_naam||"formulier")));
+  p.kv("Formulier ingevuld",nlDatum(V.meta.bron_datum));
+  if(V.meta.ingevuld_door) p.kv("Ingevuld door",V.meta.ingevuld_door);
+  p.kv("Cao",V.cao.van_toepassing?`${V.cao.naam||"—"}${V.cao.looptijd_van?` (${nlDatum(V.cao.looptijd_van)} t/m ${nlDatum(V.cao.looptijd_tot)})`:""}`:"Geen cao, eigen loongebouw");
+  p.kv("Peildatum",nlDatum(V.peildatum));
+  const ref=heeftCaoRef(V);
+  p.kop(ref?"Arbeidsvoorwaarden bovenop of naast de cao":"Arbeidsvoorwaarden");
+  if(!V.arbeidsvoorwaarden.length) p.tekst(ref?`Geen afwijkingen: de cao ${V.cao.naam} geldt volledig.`:"Geen arbeidsvoorwaarden opgegeven.",{color:p.MUTED});
+  for(const h of HOOFDSTUKKEN){
+    const its=V.arbeidsvoorwaarden.filter(a=>hoofdstukVan(a.subkop)===h).sort((a,b)=>kopVolgorde(a.subkop)-kopVolgorde(b.subkop));
+    if(!its.length) continue;
+    p.tekst(h,{size:11,bold:true,na:4});
+    let vorige=null;
+    for(const a of its){
+      if(a.subkop!==vorige){ p.subkop(a.subkop); vorige=a.subkop; }
+      p.punt(a.afspraak+(a.bron?` [${a.bron}]`:""));
+      if(a.voorwaarden) p.tekst(`Voorwaarden: ${a.voorwaarden}`,{size:9,indent:12,color:p.MUTED,na:3});
+      if(a.te_toetsen) p.tekst("Voorwaarde wordt bij de inrichting getoetst.",{size:9,indent:12,color:p.MUTED,na:3});
+    }
   }
-  p.kop("Akkoord");
-  p.tekst(`Met de ondertekening bevestigt ${naam} dat het formulier van ${nlDatum(d.meta.bron_datum)} samen met deze aanvulling de volledige en juiste arbeidsvoorwaarden weergeeft, en dat wijzigingen direct aan ${state.uitlener} worden doorgegeven.`);
-  p.tekenvak(["Naam","Functie","Datum","Handtekening"]);
+  if(ref){
+    p.kop("Conform de cao");
+    p.tekst(`Alle arbeidsvoorwaarden die hierboven niet staan, volgen de cao ${V.cao.naam||""}.`+(V.conform_cao.length?` Uitdrukkelijk gelijk aan de cao: ${[...V.conform_cao].sort((a,b)=>kopVolgorde(a)-kopVolgorde(b)).join(", ")}.`:""));
+  }
+  if(V.controle.length){
+    p.kop("Controle");
+    for(const c of V.controle){
+      p.subkop(c.subkop);
+      p.kv("Signaal",SIGNAAL[c.signaal]?.label||c.signaal,120);
+      p.kv("In het formulier",c.waarde_in_bron,120);
+      if(c.waarde_cao) p.kv("Volgens de cao",c.waarde_cao,120);
+      p.kv("Besluit",c.besluit,120);
+      if(c.toelichting) p.kv("Toelichting",c.toelichting,120);
+      p.y-=4;
+    }
+  }
+  if(V.ter_info.length){
+    p.kop("Ter info");
+    for(const t of V.ter_info) p.punt(`${t.subkop} (${SIGNAAL[t.signaal]?.label||t.signaal}): ${t.waarde_in_bron}${t.notitie?` - ${t.notitie}`:""}`);
+  }
+  if(V.ontbrekend.length){ p.kop("Niet in het formulier"); p.tekst(V.ontbrekend.join(", "),{color:p.MUTED}); }
+  const f=p.form.createTextField("bg_vastlegging");
+  f.setText(naarB64(V));
+  f.addToPage(p.doc.getPage(0),{x:0,y:0,width:1,height:1,hidden:true});
+  f.enableReadOnly();
   p.afronden();
+  p.form.updateFieldAppearances(p.font);
   return p.doc.save();
+}
+async function leesVastlegging(L,bytes){
+  let doc;
+  try{ doc=await L.PDFDocument.load(bytes,{ignoreEncryption:true}); }catch(e){ return {fout:"Dit bestand kan niet als PDF worden geopend."}; }
+  try{ return {V:uitB64(doc.getForm().getTextField("bg_vastlegging").getText())}; }
+  catch(e){ return {fout:"Dit is geen vastleggingsdocument uit deze tool."}; }
+}
+async function pdfSoort(L,bytes){
+  try{ const f=(await L.PDFDocument.load(bytes,{ignoreEncryption:true})).getForm();
+    try{ f.getTextField("bg_vastlegging"); return "vastlegging"; }catch(e){}
+    try{ f.getTextField("bg_meta"); return "uitvraag"; }catch(e){}
+  }catch(e){}
+  return "onbekend";
+}
+function staatUitVastlegging(V){
+  const data={meta:V.meta,klant:V.klant,cao:V.cao,cao_keuzes:V.cao_keuzes||{},functies:V.functies||[],conform_cao:V.conform_cao||[],ontbrekend:V.ontbrekend||[]};
+  data.uitzonderingen=V.arbeidsvoorwaarden.filter(a=>!a.te_toetsen).map(a=>({subkop:a.subkop,afspraak:a.afspraak,voorwaarden:a.voorwaarden,bronnen:a.bron?[{document:a.bron}]:[],toepassing:a.toepassing}));
+  data.te_controleren=V.arbeidsvoorwaarden.filter(a=>a.te_toetsen).map(a=>({subkop:a.subkop,signaal:"voorwaarde_toetsen",waarde_in_bron:a.afspraak,waarde_cao:null,reden:a.voorwaarden,bronnen:a.bron?[{document:a.bron}]:[],toepassing:a.toepassing}));
+  normaliseer(data);
+  const ctrl=data.te_controleren.map(c=>({...c,keuze:standaardKeuze(c,data),tekst:""}));
+  return {fase:"inrichting",scenario:1,data,uitz:data.uitzonderingen,ctrl,functies:data.functies,uitlener:V.uitlener,intercedent:V.intercedent,peildatum:V.peildatum,vastgelegd_op:V.vastgelegd_op};
 }
 
 /* ---------- Scenario 2: uitvraag ---------- */
@@ -647,25 +761,27 @@ const MEER=[
  {blok:"Ontwikkeling en overige regelingen",id:"rvu",subkop:"RVU en generatiepact",label:"Vervroegd uittreden of generatiepact"},
  {blok:"Ontwikkeling en overige regelingen",id:"overig",subkop:"Overig / niet in cao",label:"Overige regelingen",hint:"Alles wat hierboven niet staat."}
 ];
+const VOORBEELD={"loon": "Iedereen in het magazijn krijgt € 1,00 per uur boven de schaal.", "verhoging": "Per 1 juli 2% extra loonsverhoging bovenop de cao.", "vakantiegeld": "9% van het brutoloon, uitbetaald in mei.", "eindejaar": "Dertiende maand van 8,33%, bij minimaal 6 maanden in dienst op 31 december.", "eenmalig": "€ 300 bruto in december voor iedereen die op 1 december in dienst is.", "bonus": "Tot 5% van het jaarsalaris als de teamdoelen worden gehaald, uitbetaald in maart.", "jubileum": "Bij 12,5 jaar in dienst een halve maand salaris, bij 25 jaar een hele maand.", "ikb": "Keuzebudget van 16,3% van het salaris (8% vakantiegeld en 8,3% eindejaarsuitkering), maandelijks of in één keer op te nemen.", "pensioen": "Werkgever betaalt 70% van de pensioenpremie in plaats van 50%.", "ziekte": "In het tweede ziektejaar aanvulling tot 90% van het loon.", "wachtdagen": "Geen wachtdag bij ziekte.", "reiskosten": "€ 0,23 per km woon-werk vanaf de eerste kilometer, maximaal 40 km enkele reis.", "mobiliteit": "Leasefiets via het fietsplan, of € 50 per maand mobiliteitsbudget.", "reistijd": "Reistijd boven 30 minuten enkele reis wordt betaald als werktijd.", "kosten": "Werkschoenen tot € 150 per jaar; € 15 maaltijdvergoeding bij overwerk na 19.00 uur.", "thuiswerk": "€ 2,40 netto per thuiswerkdag, alleen voor kantoorfuncties.", "zorg": "€ 15 bruto per maand, alleen bij deelname aan onze collectieve zorgverzekering.", "vakantie": "27 vakantiedagen; vanaf 50 jaar 1 extra dag per jaar.", "adv": "40-urige werkweek met 13 ADV-dagen per jaar.", "feestdagen": "Bevrijdingsdag ieder jaar betaald vrij.", "sluiting": "Bedrijf dicht tussen kerst en oud en nieuw; daarvoor gaan 3 vakantiedagen af.", "bijzonder": "Verhuizing 2 dagen, eigen huwelijk 3 dagen.", "wazo": "Aanvulling tot 100% van het loon tijdens het aanvullend geboorteverlof.", "tijdvoortijd": "Overuren (maximaal 40 per jaar) opnemen als vrije tijd: 1 overuur is 1 uur vrij.", "pauzes": "Een kwartier koffiepauze per dienst wordt doorbetaald.", "overwerk": "Vanaf het eerste overuur 50% toeslag.", "onregelmatig": "Zaterdag 50% en zondag 100% toeslag.", "ploegen": "Drieploegendienst 20% toeslag.", "standby": "€ 25 per weekenddienst bereikbaarheid; gewerkte uren tegen 150%.", "toeslagen": "BHV-toeslag van € 300 per jaar.", "opleiding": "€ 500 opleidingsbudget per jaar, na 1 jaar in dienst.", "scholing": "VCA eens per 10 jaar, 8 uur onder werktijd, kosten voor de werkgever.", "vitaliteit": "Sportabonnement voor 50% vergoed.", "verzekeringen": "Collectieve ongevallenverzekering, premie volledig voor de werkgever.", "sociaal": "Werkgever betaalt de premie voor de WGA-hiaatverzekering.", "rvu": "Vanaf 62 jaar 80% werken met 90% loon en 100% pensioenopbouw.", "overig": "Personeelskorting van 10% op eigen producten."};
 const naarB64=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 const uitB64=s=>JSON.parse(decodeURIComponent(escape(atob(s))));
 function isoUitNl(s){ const m=String(s||"").match(/(\d{1,2})[-\/. ](\d{1,2})[-\/. ](\d{4})/); return m?`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`:null; }
 
-async function bouwUitvraag(L,inv){
+async function bouwUitvraag(L,inv,caoBytes){
   const naam=inv.klant.bedrijfsnaam;
   const p=await maakPdf(L,`Uitvraag arbeidsvoorwaarden ${naam}`,inv.uitlener);
   p.doc.setTitle(`Uitvraag arbeidsvoorwaarden ${naam}`);
   p.titel("Uitvraag arbeidsvoorwaarden",`${naam}, cao ${inv.cao.naam}`);
   p.tekst(`Voor uw uitzendkrachten past ${inv.uitlener} de cao ${inv.cao.naam} toe. Wij vragen u alleen wat de cao niet voor ons regelt: wat u uw eigen medewerkers méér geeft dan de cao. Lege velden betekenen dat het klopt of niet van toepassing is.`,{na:6});
-  p.tekst(`Vul dit formulier in met Adobe Acrobat Reader, sla het op en stuur het terug aan ${inv.intercedent||inv.uitlener}. U ontvangt daarna het volledige overzicht ter ondertekening.`,{color:p.MUTED,na:4});
+  p.tekst(`De cao ${inv.cao.naam} zit als bijlage achter dit formulier. Vul het formulier in en onderteken het in HelloFlex.`,{color:p.MUTED,na:4});
 
   p.kop("1. Geeft u meer dan de cao?");
-  p.tekst("Kruis alleen aan waar u uw eigen medewerkers méér geeft dan de cao, en beschrijf kort wat en onder welke voorwaarden. Geeft u niet meer, dan laat u het leeg.",{na:8});
+  p.tekst("Kruis alleen aan waar u uw eigen medewerkers méér geeft dan de cao, en beschrijf kort wat en onder welke voorwaarden. Geeft u niet meer, dan laat u het leeg. De voorbeelden laten zien wat we bedoelen; ze gelden niet voor uw bedrijf.",{na:8});
   let blok=null;
   for(const m of MEER){
     if(m.blok!==blok){ blok=m.blok; p.ruimte(110); p.y-=4; p.tekst(blok,{size:12,bold:true,color:p.ACC,na:6}); }
-    p.ruimte(70);
+    p.ruimte(84);
     p.vinkje(`meer_${m.id}`,m.label,m.hint);
+    if(VOORBEELD[m.id]) p.tekst(`Voorbeeld: “${VOORBEELD[m.id]}”`,{size:8,indent:18,color:p.ACC,na:2,lh:1.3});
     p.veld(`toel_${m.id}`,{h:28,multiline:true,indent:18});
   }
 
@@ -675,14 +791,26 @@ async function bouwUitvraag(L,inv){
     p.page.drawText(l,{x:p.M,y:p.y-14,size:10,font:p.font,color:p.MUTED});
     p.veld(id,{indent:110,width:250});
   }
-  p.tekst(`Wijzigen uw arbeidsvoorwaarden later? Geef dat dan direct door aan ${inv.uitlener}.`,{size:9,color:p.MUTED});
+  p.kop("3. Akkoord");
+  p.tekst(`Met de ondertekening in HelloFlex verklaart ${naam} dat de cao ${inv.cao.naam} in de bijlage, samen met de antwoorden in dit formulier, de volledige en juiste arbeidsvoorwaarden van de eigen werknemers weergeeft. Niet ingevulde onderdelen zijn niet van toepassing. Wijzigingen in de arbeidsvoorwaarden geeft ${naam} direct door aan ${inv.uitlener}.`);
 
   const meta=p.form.createTextField("bg_meta");
   meta.setText(naarB64({v:1,...inv}));
   meta.addToPage(p.doc.getPage(0),{x:0,y:0,width:1,height:1,hidden:true});
   meta.enableReadOnly();
-  p.afronden();
+  let caoDoc=null;
+  if(caoBytes){ caoDoc=await L.PDFDocument.load(caoBytes,{ignoreEncryption:true}); }
+  if(caoDoc){
+    p.nieuwePagina();
+    p.y-=120;
+    p.tekst("Bijlage",{size:12,bold:true,color:p.ACC,na:4});
+    p.tekst(`Cao ${inv.cao.naam}`,{size:20,bold:true,lh:1.2,na:6});
+    p.tekst(`Uitdraai Caoloon${inv.cao.uitdraai_datum?` d.d. ${nlDatum(inv.cao.uitdraai_datum)}`:""}${inv.cao.looptijd_van?`, looptijd ${nlDatum(inv.cao.looptijd_van)} t/m ${nlDatum(inv.cao.looptijd_tot)}`:""}.`,{color:p.MUTED});
+  }
+  const eigen=p.doc.getPageCount();
+  p.afronden(eigen+(caoDoc?caoDoc.getPageCount():0));
   p.form.updateFieldAppearances(p.font);
+  if(caoDoc){ const kopie=await p.doc.copyPages(caoDoc,caoDoc.getPageIndices()); kopie.forEach(pg=>p.doc.addPage(pg)); }
   return p.doc.save();
 }
 
@@ -691,7 +819,7 @@ async function leesUitvraag(L,bytes){
   try{ doc=await L.PDFDocument.load(bytes,{ignoreEncryption:true}); }catch(e){ return {fout:"Dit bestand kan niet als PDF worden geopend."}; }
   const form=doc.getForm();
   let inv;
-  try{ inv=uitB64(form.getTextField("bg_meta").getText()); }catch(e){ return {fout:"Dit is geen uitvraag uit deze tool. Gebruik voor een eigen formulier van de opdrachtgever de route ‘Formulier van de opdrachtgever’."}; }
+  try{ inv=uitB64(form.getTextField("bg_meta").getText()); }catch(e){ return {fout:"Dit is geen uitvraag uit deze tool. Haal een eigen formulier van de opdrachtgever eerst door de beloningsassistent."}; }
   const txt=n=>{try{return (form.getTextField(n).getText()||"").trim()}catch(e){return ""}};
   const chk=n=>{try{return form.getCheckBox(n).isChecked()}catch(e){return false}};
   const uitz=[], ctrl=[];
@@ -703,7 +831,7 @@ async function leesUitvraag(L,bytes){
   const door=[txt("door_naam"),txt("door_functie"),txt("door_email")].filter(Boolean).join(", ");
   const datum=isoUitNl(txt("door_datum"));
   const data={
-    meta:{schema_versie:"1.1",bron_type:"uitvraag_scenario2",bron_naam:"Uitvraag arbeidsvoorwaarden",bron_datum:datum,peildatum:inv.peildatum,ingevuld_door:door||null},
+    meta:{schema_versie:"1.2",bron_type:"uitvraag_scenario2",bron_naam:"Uitvraag arbeidsvoorwaarden",bron_datum:datum,peildatum:inv.peildatum,ingevuld_door:door||null,documenten:["Uitvraag arbeidsvoorwaarden",`Caoloon-uitdraai cao ${inv.cao.naam}`]},
     klant:inv.klant,
     cao:{van_toepassing:true,naam:inv.cao.naam,looptijd_van:inv.cao.looptijd_van||null,looptijd_tot:inv.cao.looptijd_tot||null,eigen_regeling_naast_cao:uitz.length>0},
     cao_keuzes:inv.cao_keuzes, functies:inv.functies, conform_cao:[], uitzonderingen:uitz, te_controleren:ctrl, ontbrekend:[]
@@ -720,238 +848,268 @@ async function leesUitvraag(L,bytes){
 const $=s=>document.querySelector(s);
 document.getElementById("logo").src="data:image/png;base64,"+LOGO_DIAP;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let state=null;
 const UITLENERS=["Intermediair Uitzendbureau","Buddo","Zorgmensen","50+Werkt","IU Groep"];
+const ZACHT=matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth";
+let state=null;   // controleren en vastleggen
+let istate=null;  // inrichten
 
 function vandaag(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function msg(el,type,html){$(el).innerHTML=html?`<div class="msg ${type}">${html}</div>`:""}
 function zetStap(n,open){$(n).classList.toggle("locked",!open)}
-
-function laadTekst(tekst){
-  let r;
-  try{ r=parseBron(tekst); }
-  catch(e){ msg("#m1","err",`Dit bestand kan niet worden gelezen. Gebruik het bestand dat de beloningsassistent heeft gemaakt. (${esc(e.message)})`); return; }
-  if(r.fouten){ msg("#m1","err",r.fouten.map(esc).join("<br>")); return; }
-  { const dd=r.data, docs=(dd.meta.documenten||[]).join(" ");
-    const zonderRef = dd.meta.cao_referentie===false || (dd.cao.van_toepassing && !dd.conform_cao.length && !/caoloon/i.test(docs) && (dd.meta.documenten||[]).length<=1);
-    if(zonderRef) r.waarschuwingen.push(`Er geldt een cao (${dd.cao.naam||"naam onbekend"}), maar er is geen cao of Caoloon-uitdraai meegegeven. Daardoor kan niets als ‘conform cao’ worden herkend. Draai de Caoloon-uitdraai en haal het formulier samen met de uitdraai opnieuw door de assistent.`); }
-  if(r.oud) r.waarschuwingen.push("Dit formulier is gemarkeerd als oud inlenersbeloningsformulier. Controleer of alle arbeidsvoorwaarden erin staan.");
-  const d=r.data;
-  state={
-    scenario:1, data:d,
-    uitz:d.uitzonderingen.map(u=>({...u})),
-    ctrl:d.te_controleren.map(c=>({...c,keuze:standaardKeuze(c,d),tekst:""})),
-    functies:d.functies.map(f=>({...f})),
-    uitlener:UITLENERS[0], intercedent:"", peildatum:vandaag()
-  };
-  msg("#m1",r.waarschuwingen.length?"warn":"ok",r.waarschuwingen.length?r.waarschuwingen.map(esc).join("<br>"):`Formulier van ${esc(d.klant.bedrijfsnaam||"opdrachtgever")} ingelezen.`);
-  zetStap("#s2",true); zetStap("#s3",true);
-  render();
-  $("#s2").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
-}
-$("#lees").addEventListener("click",()=>laadTekst($("#bron").value));
-async function laadBestand(f){
-  if(!f) return; leegGedeeld();
-  if(/\.pdf$/i.test(f.name)||f.type==="application/pdf") return laadUitvraagPdf(f);
-  laadTekst(await f.text());
-}
-$("#bestand").addEventListener("change",e=>laadBestand(e.target.files[0]));
-const dz=$("#drop");
-["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over");}));
-["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("over");}));
-dz.addEventListener("drop",e=>laadBestand(e.dataTransfer.files[0]));
-function leegGedeeld(){ state=null; msg("#m3"); ["#overzicht","#controles","#uitzonderingen"].forEach(s=>$(s).innerHTML=""); zetStap("#s2",false); zetStap("#s3",false); }
-$("#wis").addEventListener("click",()=>{ leegGedeeld(); $("#bron").value=""; $("#bestand").value=""; msg("#m1"); });
-
-/* Scenario kiezen */
-document.querySelectorAll(".modes button").forEach(b=>b.addEventListener("click",()=>{
-  const m=b.dataset.mode; if(document.body.dataset.mode===m) return;
-  document.body.dataset.mode=m;
-  document.querySelectorAll(".modes button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
-  $("#s3hint").textContent=m==="2"?"Het inrichtingsdocument is intern en bevat de afwijkingen bovenop de cao.":"Het inrichtingsdocument is intern. De aanvulling gaat samen met het formulier van de opdrachtgever ter ondertekening naar HelloFlex.";
-  leegGedeeld(); msg("#m1"); $("#bestand").value="";
-}));
-
-/* Scenario 2: uitvraag maken */
-$("#b_uitlener").innerHTML=UITLENERS.map(u=>`<option>${esc(u)}</option>`).join("");
-$("#b_peildatum").value=vandaag();
-function verzamelInvoer(){
-  const val=id=>$(id).value.trim();
-  return {
-    klant:{bedrijfsnaam:val("#b_bedrijf"),kvk_nummer:null,vestigingsplaats:null,contactpersoon_naam:val("#b_contact")||null,contactpersoon_email:val("#b_email")||null},
-    cao:{naam:val("#b_cao"),looptijd_van:val("#b_van")||null,looptijd_tot:val("#b_tot")||null},
-    cao_keuzes:{uren_per_week:null,loontabel:null,dagvenster:null,ploegendienst:null,overwerk_inbegrepen_in_salaris:null},
-    functies:[],
-    uitlener:val("#b_uitlener"), intercedent:val("#b_intercedent"), peildatum:val("#b_peildatum")||vandaag()
-  };
-}
-$("#b_maak").onclick=async()=>{
-  const inv=verzamelInvoer();
-  const mis=[]; if(!inv.klant.bedrijfsnaam) mis.push("de bedrijfsnaam"); if(!inv.cao.naam) mis.push("de cao");
-  if(mis.length){ msg("#mb1","err",`Vul ${mis.join(" en ")} in om de uitvraag te maken.`); return; }
-  if(typeof PDFLib==="undefined"){ msg("#mb1","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
-  try{
-    const k=inv.klant.bedrijfsnaam.replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_");
-    download(await bouwUitvraag(PDFLib,inv),`Uitvraag_${k}_${inv.peildatum}.pdf`);
-    msg("#mb1","ok",`Uitvraag gemaakt. Stuur hem naar ${esc(inv.klant.contactpersoon_naam||"de opdrachtgever")}. Krijg je hem ingevuld terug, ga dan naar ‘Formulier van de opdrachtgever’ en sleep hem in het sleepvak.`);
-  }catch(e){ msg("#mb1","err",`De uitvraag kon niet worden gemaakt: ${esc(e.message)}`); }
-};
-
-/* Ingevulde uitvraag inlezen (via het sleepvak van ‘Formulier van de opdrachtgever’) */
-async function laadUitvraagPdf(f){
-  if(typeof PDFLib==="undefined"){ msg("#m1","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
-  const r=await leesUitvraag(PDFLib,new Uint8Array(await f.arrayBuffer()));
-  if(r.fout){ msg("#m1","err",esc(r.fout)); return; }
-  const d=r.data;
-  state={scenario:2,data:d,uitz:d.uitzonderingen.map(u=>({...u})),ctrl:d.te_controleren.map(c=>({...c,keuze:standaardKeuze(c,d),tekst:""})),functies:d.functies.map(x=>({...x})),uitlener:r.inv.uitlener,intercedent:r.inv.intercedent,peildatum:r.inv.peildatum};
-  const kern=`Uitvraag van ${esc(d.klant.bedrijfsnaam)} ingelezen: ${d.uitzonderingen.length} afwijking(en), ${d.te_controleren.length} controlepunt(en).`+(!d.uitzonderingen.length&&!d.te_controleren.length?" De opdrachtgever geeft niets meer dan de cao.":"");
-  msg("#m1",r.waarschuwingen.length?"warn":"ok",[kern,...r.waarschuwingen.map(esc)].join("<br>"));
-  zetStap("#s2",true); zetStap("#s3",true); render();
-  $("#s2").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
-}
-
-function render(){ renderOverzicht(); renderControles(); renderUitz(); renderKnoppen(); }
-
-function renderOverzicht(){
-  const d=state.data, v=verzamel(state);
-  $("#overzicht").innerHTML=`
-  <dl class="facts">
-    <div><dt>Opdrachtgever</dt><dd>${esc(d.klant.bedrijfsnaam||"—")}</dd></div>
-    ${d.klant.kvk_nummer?`<div><dt>KvK</dt><dd>${esc(d.klant.kvk_nummer)}</dd></div>`:""}
-    <div><dt>Cao</dt><dd>${d.cao.van_toepassing?esc(d.cao.naam||"—"):"Geen cao, eigen loongebouw"}</dd></div>
-    <div><dt>Bronformulier</dt><dd>${esc(d.meta.bron_naam||d.meta.bron_type)}, ${esc(nlDatum(d.meta.bron_datum))}</dd></div>
-  </dl>
-  <p class="tally"><span><b>${state.uitz.length}</b> afwijkingen</span><span><b>${state.ctrl.length}</b> controlepunten (<span id="openTel">${v.open.length}</span> open, waarvan <span id="openEss">${v.openEss.length}</span> essentieel)</span><span><b>${d.conform_cao.length}</b> conform cao</span></p>
-  <div class="fields" style="margin:16px 0 8px">
-    <label class="f">Uitlener<select id="uitlener">${UITLENERS.map(u=>`<option${u===state.uitlener?" selected":""}>${esc(u)}</option>`).join("")}</select></label>
-    <label class="f">Intercedent<input id="intercedent" value="${esc(state.intercedent)}" autocomplete="name"></label>
-    <label class="f">Peildatum<input id="peildatum" type="date" value="${esc(state.peildatum)}"></label>
-  </div>
-  ${state.functies.length?`<div class="fields" style="margin-bottom:8px">${state.functies.map((f,i)=>`<label class="f">Schaal of functiegroep: ${esc(f.functienaam)}<input data-functie="${i}" value="${esc(f.schaal_of_functiegroep||"")}" placeholder="Uit de Caoloon-uitdraai"></label>`).join("")}</div>`:""}
-  ${d.ontbrekend.length?`<p class="small-list">Niet in het formulier: ${esc(d.ontbrekend.join(", "))}</p>`:""}`;
-  $("#uitlener").onchange=e=>state.uitlener=e.target.value;
-  $("#intercedent").oninput=e=>state.intercedent=e.target.value;
-  $("#peildatum").onchange=e=>state.peildatum=e.target.value;
-  document.querySelectorAll("[data-functie]").forEach(el=>el.oninput=e=>state.functies[+e.target.dataset.functie].schaal_of_functiegroep=e.target.value);
-}
-
-const KEUZES=[
-  ["cao","Cao geldt voor de uitzendkracht"],
-  ["correctie","Opdrachtgever corrigeert het formulier"],
-  ["bron","Formulier klopt, afspraak van de opdrachtgever geldt"],
-  ["vervalt","Niet van toepassing, vervalt"]
-];
-const KEUZES_VOORW=[
-  ["bron","Uitzendkracht kan aan de voorwaarde voldoen: de regeling geldt"],
-  ["pergeval","Per geval bepalen door de backoffice"],
-  ["vervalt","Niet van toepassing, vervalt"]
-];
-function renderControles(){
-  if(!state.ctrl.length){ $("#controles").innerHTML=`<div class="msg ok">Geen controlepunten. Ga door naar de documenten.</div>`; return; }
-  const volgorde=state.ctrl.map((c,i)=>i).sort((a,b)=>sorteerSleutel(state.ctrl[a])-sorteerSleutel(state.ctrl[b]));
-  let vorigeGroep=null;
-  $("#controles").innerHTML=`<h3 style="margin:24px 0 4px">Controlepunten</h3><p class="hint">Begin bij de essentiële punten. Zijn die beoordeeld, dan kun je het inrichtingsdocument al downloaden. Punten ‘alleen onder voorwaarden’ staan standaard op ‘per geval bepalen door de backoffice’.</p>`+volgorde.map(i=>{
-    const c=state.ctrl[i];
-    const g=groep(c);
-    let kopHtml="";
-    if(g!==vorigeGroep){ vorigeGroep=g; const n=state.ctrl.filter(x=>groep(x)===g).length, o=state.ctrl.filter(x=>groep(x)===g&&!controleGeldig(x)).length; kopHtml=`<h4 class="grp grp-${g}">${esc(GROEP_LABEL[g])} <span>${n} punt(en), ${o} open</span></h4>`; }
-    const toepHtml=g==="essentieel"?`<span class="pill pill-ess">Essentieel</span>`:`<select class="toep" data-ctoep="${i}" aria-label="Toepassing"><option value="structureel"${c.toepassing!=="voorwaardelijk"?" selected":""}>Structureel</option><option value="voorwaardelijk"${c.toepassing==="voorwaardelijk"?" selected":""}>Alleen onder voorwaarden</option></select>`;
-    const s=SIGNAAL[c.signaal]||{label:c.signaal,cls:"s-ondu"};
-    const ref=heeftCaoRef(state.data);
-    let keuzes=c.signaal==="voorwaarde_toetsen"?KEUZES_VOORW:KEUZES.filter(([k])=>ref||k!=="cao");
-    const bo=bronOpties(c);
-    if(bo.length>=2 && c.signaal!=="voorwaarde_toetsen"){
-      keuzes=[
-        ...bo.map(({b,i})=>[`bronidx:${i}`,`Klopt: ${kortDoc(b.document)}`]),
-        ...(ref&&/caoloon/i.test((state.data.meta.documenten||[]).join(" "))?[["cao","Cao geldt (Caoloon-uitdraai)"]]:[]),
-        ["correctie","Combinatie of anders: zelf invullen wat geldt"],
-        ["vervalt","Niet van toepassing, vervalt"]
-      ];
-    }
-    if(groep(c)==="voorwaardelijk" && !keuzes.some(([k])=>k==="pergeval")) keuzes=[["pergeval","Per geval bepalen door de backoffice"],...keuzes];
-    const vergelijk=(c.bronnen||[]).filter(b=>b.tekst).length>=2
-      ? `<div class="compare">${c.bronnen.filter(b=>b.tekst).map(b=>`<div><span>${esc(kortDoc(b.document))}${b.vindplaats?", "+esc(b.vindplaats):""}</span>${esc(b.tekst)}</div>`).join("")}</div>`
-      : `<div class="compare"><div><span>In het formulier</span>${esc(c.waarde_in_bron)}</div><div><span>Volgens de cao</span>${esc(c.waarde_cao||"—")}</div></div>`;
-    const tekstLabel=String(c.keuze).startsWith("bronidx:")?"Wat geldt (overgenomen uit de gekozen bron; pas aan als nodig)":c.keuze==="correctie"?"Wat geldt volgens de opdrachtgever (komt in de aanvulling)":c.keuze==="bron"&&c.signaal==="mogelijk_onder_cao"?"Waarom is dit niet lager dan de cao? (verplicht)":"Antwoord of toelichting (optioneel)";
-    return kopHtml+`<article class="ctrl ${s.cls} ${controleGeldig(c)?"done":""}" data-i="${i}">
-      <div class="ctrl-head"><h3>${esc(c.subkop)}</h3><span class="ctrl-tags">${toepHtml}<span class="pill">${esc(s.label)}</span></span></div>
-      ${vergelijk}
-      <p class="reden">${esc(c.reden||"")}</p>
-      <div class="keuzes" role="radiogroup" aria-label="Besluit ${esc(c.subkop)}">${keuzes.map(([k,l])=>`<label><input type="radio" name="k${i}" value="${k}"${c.keuze===k?" checked":""}> ${esc(l)}</label>`).join("")}</div>
-      <label class="f">${esc(tekstLabel)}<textarea rows="2" data-tekst="${i}">${esc(c.tekst)}</textarea></label>
-    </article>`;
-  }).join("");
-  document.querySelectorAll(".ctrl input[type=radio]").forEach(r=>r.onchange=e=>{
-    const i=+e.target.closest(".ctrl").dataset.i, c=state.ctrl[i], oud=c.keuze; c.keuze=e.target.value;
-    if(c.keuze.startsWith("bronidx:")){ const b=c.bronnen[+c.keuze.split(":")[1]]; const vorigeAuto=oud&&oud.startsWith("bronidx:")?(c.bronnen[+oud.split(":")[1]]||{}).tekst:""; if(!c.tekst||c.tekst===vorigeAuto) c.tekst=b.tekst||""; }
-    renderControles(); renderKnoppen(); updateTeller();
-    document.querySelector(`.ctrl[data-i="${i}"] input[value="${e.target.value}"]`)?.focus();
-  });
-  document.querySelectorAll("[data-ctoep]").forEach(sel=>sel.onchange=e=>{ const c=state.ctrl[+e.target.dataset.ctoep]; c.toepassing=e.target.value;
-    if(c.toepassing==="voorwaardelijk" && !c.keuze) c.keuze="pergeval";
-    if(c.toepassing==="structureel" && c.keuze==="pergeval" && c.signaal!=="voorwaarde_toetsen") c.keuze="";
-    renderControles(); renderKnoppen(); updateTeller(); });
-  document.querySelectorAll("[data-tekst]").forEach(t=>t.oninput=e=>{
-    const i=+e.target.dataset.tekst; state.ctrl[i].tekst=e.target.value;
-    e.target.closest(".ctrl").classList.toggle("done",controleGeldig(state.ctrl[i])); renderKnoppen(); updateTeller();
-  });
-}
-function updateTeller(){ const el=$("#openTel"); if(el) el.textContent=state.ctrl.filter(c=>!controleGeldig(c)).length; const e2=$("#openEss"); if(e2) e2.textContent=state.ctrl.filter(c=>groep(c)==="essentieel"&&!controleGeldig(c)).length; }
-
-function renderUitz(){
-  const opties=sel=>HOOFDSTUKKEN.map(h=>`<optgroup label="${esc(h)}">${KOPPEN.filter(([hh,k])=>hh===h&&!VERBORGEN_KOPPEN.has(k)).map(([,k])=>`<option${k===sel?" selected":""}>${esc(k)}</option>`).join("")}</optgroup>`).join("");
-  const idx=state.uitz.map((u,i)=>({u,i})).sort((a,b)=>kopVolgorde(a.u.subkop)-kopVolgorde(b.u.subkop));
-  const dub=dubbelen(state.uitz);
-  const dubSet=new Set(dub.flat());
-  let html=`<details open><summary>Afwijkingen voor de inrichting (${state.uitz.length})</summary><p class="hint" style="margin-top:8px">Pas de tekst aan of verwijder een regel als die niet klopt.</p>`;
-  if(dub.length) html+=`<div class="msg warn">Mogelijk dubbel: ${dub.map(([a,b])=>`“${esc(state.uitz[a].subkop)}” en “${esc(state.uitz[b].subkop)}”`).join("; ")}. Controleer of het om dezelfde regeling gaat en verwijder er dan één.</div>`;
-  for(const h of HOOFDSTUKKEN){
-    const items=idx.filter(x=>hoofdstukVan(x.u.subkop)===h); if(!items.length) continue;
-    html+=`<div class="uitz-group"><h3>${esc(h)}</h3>`+items.map(({u,i})=>`<div class="uitz"${dubSet.has(i)?' style="outline:2px solid var(--tegen);outline-offset:4px;border-radius:4px"':""}><div><select data-kop="${i}" aria-label="Subkop">${opties(u.subkop)}</select><div class="uitleg">${esc(UITLEG[u.subkop]||"")}</div>${groep(u)==="essentieel"?`<span class="pill pill-ess" style="display:inline-block;margin-top:6px">Essentieel</span>`:`<select class="toep" data-utoep="${i}" aria-label="Toepassing" style="margin-top:6px"><option value="structureel"${u.toepassing!=="voorwaardelijk"?" selected":""}>Structureel</option><option value="voorwaardelijk"${u.toepassing==="voorwaardelijk"?" selected":""}>Alleen onder voorwaarden</option></select>`}</div><div><textarea data-afspraak="${i}" aria-label="Afspraak">${esc(u.afspraak)}</textarea><div class="uitleg" style="margin-top:8px">Voorwaarden</div><textarea class="voorw" data-voorw="${i}" aria-label="Voorwaarden" placeholder="Voorwaarden (leeg als er geen zijn)">${esc(u.voorwaarden||"")}</textarea>${(u.bronnen||[]).length?`<div class="bronnen">Bron: ${esc(u.bronnen.map(b=>[b.document,b.vindplaats].filter(Boolean).join(", ")).join("; "))}</div>`:""}</div><button class="secondary small" data-del="${i}" aria-label="Verwijder afwijking">Verwijder</button></div>`).join("")+`</div>`;
-  }
-  html+=`<div class="row"><button class="secondary small" id="nieuw">Afwijking toevoegen</button></div></details>`;
-  $("#uitzonderingen").innerHTML=html;
-  document.querySelectorAll("[data-kop]").forEach(s=>s.onchange=e=>{state.uitz[+e.target.dataset.kop].subkop=e.target.value; renderUitz();});
-  document.querySelectorAll("[data-afspraak]").forEach(t=>{ t.oninput=e=>state.uitz[+e.target.dataset.afspraak].afspraak=e.target.value; t.onchange=()=>renderUitz(); });
-  document.querySelectorAll("[data-utoep]").forEach(sel=>sel.onchange=e=>{ state.uitz[+e.target.dataset.utoep].toepassing=e.target.value; });
-  document.querySelectorAll("[data-voorw]").forEach(t=>t.oninput=e=>state.uitz[+e.target.dataset.voorw].voorwaarden=e.target.value);
-  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{state.uitz.splice(+e.target.dataset.del,1); renderUitz(); renderOverzicht();});
-  $("#nieuw").onclick=()=>{state.uitz.push({subkop:"Overig / niet in cao",afspraak:"",voorwaarden:null,toepassing:"structureel",bronnen:[{document:"handmatig toegevoegd"}]}); renderUitz(); renderOverzicht(); const t=document.querySelectorAll("[data-afspraak]"); t[t.length-1]?.focus();};
-}
-
-function renderKnoppen(){
-  const open=state.ctrl.filter(c=>!controleGeldig(c)).length;
-  const v=verzamel(state);
-  const openEss=v.openEss.length;
-  $("#pdfInrichting").disabled = openEss>0;
-  $("#pdfAanvulling").hidden = state.scenario===2;
-  $("#pdfAanvulling").disabled = open>0 || v.correcties.length===0;
-  let m="", t="ok";
-  if(openEss){ t="warn"; m=`Beoordeel eerst de ${openEss} essentiële controlepunt(en). Daarna kun je het inrichtingsdocument downloaden.`; }
-  else if(open){ t="warn"; m=`Het inrichtingsdocument kan worden gedownload. Er staan nog ${open} niet-essentiële punt(en) open; die komen onder ‘Nog te beoordelen’.`+(state.scenario===2?"":" De aanvulling kan pas als alles is beoordeeld."); }
-  else if(state.scenario===2) m="Het inrichtingsdocument is klaar. Het samengevoegde document voor HelloFlex (Caoloon-uitdraai met de afwijkingen per hoofdstuk) volgt in de volgende versie.";
-  else if(!v.correcties.length) m="Er zijn geen correcties: het formulier van de opdrachtgever kan zonder aanvulling ter ondertekening naar HelloFlex.";
-  msg("#m3",t,m);
-}
-
-function bestandsnaam(prefix){
-  const k=(state.data.klant.bedrijfsnaam||"opdrachtgever").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_");
-  return `${prefix}_${k}_${state.peildatum||vandaag()}.pdf`;
-}
+function pdfOk(el){ if(typeof PDFLib==="undefined"){ msg(el,"err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return false;} return true; }
+function slug(t){ return String(t||"opdrachtgever").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_"); }
 function download(bytes,naam){
   const url=URL.createObjectURL(new Blob([bytes],{type:"application/pdf"}));
   const a=document.createElement("a"); a.href=url; a.download=naam; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
-async function maak(soort){
-  if(typeof PDFLib==="undefined"){ msg("#m3","err","De PDF-bibliotheek is niet geladen. Controleer de internetverbinding en laad de pagina opnieuw."); return; }
-  try{
-    if(soort==="inrichting") download(await bouwInrichting(PDFLib,state),bestandsnaam("Inrichting"));
-    else download(await bouwAanvulling(PDFLib,state),bestandsnaam("Aanvulling"));
-  }catch(e){ msg("#m3","err",`Het document kon niet worden gemaakt: ${esc(e.message)}`); }
+function sleepvak(zone,input,fn){
+  ["dragenter","dragover"].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add("over");}));
+  ["dragleave","drop"].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove("over");}));
+  zone.addEventListener("drop",e=>fn(e.dataTransfer.files[0]));
+  input.addEventListener("change",e=>fn(e.target.files[0]));
 }
-$("#pdfInrichting").onclick=()=>maak("inrichting");
-$("#pdfAanvulling").onclick=()=>maak("aanvulling");
+const kopOpties=sel=>HOOFDSTUKKEN.map(h=>`<optgroup label="${esc(h)}">${KOPPEN.filter(([hh,k])=>hh===h&&!VERBORGEN_KOPPEN.has(k)).map(([,k])=>`<option${k===sel?" selected":""}>${esc(k)}</option>`).join("")}</optgroup>`).join("");
+
+/* ---------- Stap kiezen ---------- */
+function kiesStap(m){
+  document.body.dataset.mode=m;
+  document.querySelectorAll(".modes button").forEach(x=>x.setAttribute("aria-selected",String(x.dataset.mode===m)));
+}
+document.querySelectorAll(".modes button").forEach(b=>b.addEventListener("click",()=>kiesStap(b.dataset.mode)));
+
+/* ---------- Uitvraag opmaken ---------- */
+$("#b_uitlener").innerHTML=UITLENERS.map(u=>`<option>${esc(u)}</option>`).join("");
+$("#b_peildatum").value=vandaag();
+let caoBestand=null;
+sleepvak($("#drop_cao"),$("#b_caopdf"),f=>{ if(!f) return; caoBestand=f; $("#drop_cao_t").textContent=`Gekozen: ${f.name}`; });
+$("#b_maak").onclick=async()=>{
+  const val=id=>$(id).value.trim();
+  const inv={
+    klant:{bedrijfsnaam:val("#b_bedrijf"),kvk_nummer:null,vestigingsplaats:null,contactpersoon_naam:val("#b_contact")||null,contactpersoon_email:val("#b_email")||null},
+    cao:{naam:val("#b_cao"),looptijd_van:val("#b_van")||null,looptijd_tot:val("#b_tot")||null,bijlage:caoBestand?caoBestand.name:null,uitdraai_datum:vandaag()},
+    cao_keuzes:{},functies:[],
+    uitlener:val("#b_uitlener"), intercedent:val("#b_intercedent"), peildatum:val("#b_peildatum")||vandaag()
+  };
+  const mis=[]; if(!inv.klant.bedrijfsnaam) mis.push("de bedrijfsnaam"); if(!inv.cao.naam) mis.push("de cao"); if(!caoBestand) mis.push("de Caoloon-uitdraai");
+  if(mis.length){ msg("#mb1","err",`Vul ${mis.join(", ").replace(/, ([^,]*)$/," en $1")} in om de uitvraag te maken.`); return; }
+  if(!pdfOk("#mb1")) return;
+  try{
+    const bytes=await bouwUitvraag(PDFLib,inv,new Uint8Array(await caoBestand.arrayBuffer()));
+    download(bytes,`Uitvraag_met_cao_${slug(inv.klant.bedrijfsnaam)}_${inv.peildatum}.pdf`);
+    msg("#mb1","ok","Uitvraag met cao gemaakt. Zet het document in HelloFlex klaar voor ondertekening. Is hij getekend terug, ga dan naar ‘Controleren en vastleggen’.");
+  }catch(e){ msg("#mb1","err",`De uitvraag kon niet worden gemaakt: ${esc(e.message)}`); }
+};
+
+/* ---------- Controleren en vastleggen ---------- */
+function controleStandaard(c,d){ return c.signaal==="mogelijk_onder_cao"&&heeftCaoRef(d)?"cao":""; }
+function startControle(d,extra){
+  state={fase:"controle",data:d,uitz:d.uitzonderingen.map(u=>({...u})),ctrl:d.te_controleren.map(c=>({...c,keuze:controleStandaard(c,d),tekst:""})),functies:d.functies.map(f=>({...f})),uitlener:UITLENERS[0],intercedent:"",peildatum:vandaag(),...extra};
+  zetStap("#s2",true); zetStap("#s3",true); renderC();
+  $("#s2").scrollIntoView({behavior:ZACHT});
+}
+function leegC(){ state=null; msg("#m3"); ["#overzicht","#controles","#uitzonderingen"].forEach(s=>$(s).innerHTML=""); zetStap("#s2",false); zetStap("#s3",false); }
+function laadTekst(tekst){
+  let r;
+  try{ r=parseBron(tekst); }
+  catch(e){ msg("#m1","err",`Dit bestand kan niet worden gelezen. Gebruik het bestand dat de beloningsassistent heeft gemaakt. (${esc(e.message)})`); return; }
+  if(r.fouten){ msg("#m1","err",r.fouten.map(esc).join("<br>")); return; }
+  const dd=r.data, docs=(dd.meta.documenten||[]).join(" ");
+  if(dd.meta.cao_referentie===false || (dd.cao.van_toepassing && !dd.conform_cao.length && !/caoloon/i.test(docs) && (dd.meta.documenten||[]).length<=1))
+    r.waarschuwingen.push(`Er geldt een cao (${dd.cao.naam||"naam onbekend"}), maar er is geen cao of Caoloon-uitdraai meegegeven. Daardoor kan niets als ‘conform cao’ of ‘mogelijk onder cao’ worden herkend. Haal het formulier samen met de Caoloon-uitdraai opnieuw door de assistent.`);
+  if(r.oud) r.waarschuwingen.push("Dit formulier is gemarkeerd als oud inlenersbeloningsformulier. Controleer of alle arbeidsvoorwaarden erin staan.");
+  msg("#m1",r.waarschuwingen.length?"warn":"ok",r.waarschuwingen.length?r.waarschuwingen.map(esc).join("<br>"):`Formulier van ${esc(dd.klant.bedrijfsnaam||"opdrachtgever")} ingelezen.`);
+  startControle(dd,{});
+}
+async function laadBestand(f){
+  if(!f) return; leegC();
+  if(/\.pdf$/i.test(f.name)||f.type==="application/pdf"){
+    if(!pdfOk("#m1")) return;
+    const bytes=new Uint8Array(await f.arrayBuffer());
+    const soort=await pdfSoort(PDFLib,bytes);
+    if(soort==="vastlegging"){ kiesStap("i"); return laadVastlegging(f); }
+    if(soort!=="uitvraag"){ msg("#m1","err","Deze PDF komt niet uit deze tool. Haal een formulier van de opdrachtgever eerst door de beloningsassistent."); return; }
+    const r=await leesUitvraag(PDFLib,bytes);
+    if(r.fout){ msg("#m1","err",esc(r.fout)); return; }
+    const d=r.data;
+    msg("#m1",r.waarschuwingen.length?"warn":"ok",[`Uitvraag van ${esc(d.klant.bedrijfsnaam)} ingelezen: ${d.uitzonderingen.length} afwijking(en), ${d.te_controleren.length} punt(en) om na te kijken.`+(!d.uitzonderingen.length&&!d.te_controleren.length?" De opdrachtgever geeft niets meer dan de cao.":""),...r.waarschuwingen.map(esc)].join("<br>"));
+    return startControle(d,{uitlener:r.inv.uitlener,intercedent:r.inv.intercedent,peildatum:r.inv.peildatum});
+  }
+  laadTekst(await f.text());
+}
+sleepvak($("#drop"),$("#bestand"),laadBestand);
+$("#lees").addEventListener("click",()=>{ leegC(); laadTekst($("#bron").value); });
+$("#wis").addEventListener("click",()=>{ leegC(); $("#bron").value=""; $("#bestand").value=""; msg("#m1"); });
+
+function renderC(){ renderOverzichtC(); renderControlesC(); renderUitzC(); renderKnoppenC(); }
+function renderOverzichtC(){
+  const d=state.data;
+  const blok=state.ctrl.filter(c=>BLOKKEREND.has(c.signaal)), info=state.ctrl.filter(c=>!BLOKKEREND.has(c.signaal)&&c.signaal!=="voorwaarde_toetsen"), door=state.ctrl.filter(c=>c.signaal==="voorwaarde_toetsen");
+  $("#overzicht").innerHTML=`
+  <dl class="facts">
+    <div><dt>Opdrachtgever</dt><dd>${esc(d.klant.bedrijfsnaam||"—")}</dd></div>
+    <div><dt>Cao</dt><dd>${d.cao.van_toepassing?esc(d.cao.naam||"—"):"Geen cao, eigen loongebouw"}</dd></div>
+    <div><dt>Bronnen</dt><dd>${esc((d.meta.documenten&&d.meta.documenten.length?d.meta.documenten.map(kortDoc).join("; "):d.meta.bron_naam||"formulier"))}</dd></div>
+    <div><dt>Ingevuld</dt><dd>${esc(nlDatum(d.meta.bron_datum))}</dd></div>
+  </dl>
+  <p class="tally"><span><b>${state.uitz.length}</b> arbeidsvoorwaarden</span><span><b>${blok.length}</b> te controleren (<span id="openC">${blok.filter(c=>!controleGeldig(c)).length}</span> open)</span><span><b>${info.length}</b> ter info</span><span><b>${door.length}</b> met voorwaarde, naar inrichting</span></p>
+  <div class="fields" style="margin:16px 0 8px">
+    <label class="f">Uitlener<select id="uitlener">${UITLENERS.map(u=>`<option${u===state.uitlener?" selected":""}>${esc(u)}</option>`).join("")}</select></label>
+    <label class="f">Intercedent<input id="intercedent" value="${esc(state.intercedent)}" autocomplete="name"></label>
+    <label class="f">Peildatum<input id="peildatum" type="date" value="${esc(state.peildatum)}"></label>
+  </div>
+  ${d.ontbrekend.length?`<p class="small-list">Niet in het formulier: ${esc(d.ontbrekend.join(", "))}</p>`:""}`;
+  $("#uitlener").onchange=e=>state.uitlener=e.target.value;
+  $("#intercedent").oninput=e=>state.intercedent=e.target.value;
+  $("#peildatum").onchange=e=>state.peildatum=e.target.value;
+}
+function vergelijkHtml(c){
+  return (c.bronnen||[]).filter(b=>b.tekst).length>=2
+    ? `<div class="compare">${c.bronnen.filter(b=>b.tekst).map(b=>`<div><span>${esc(kortDoc(b.document))}${b.vindplaats?", "+esc(b.vindplaats):""}</span>${esc(b.tekst)}</div>`).join("")}</div>`
+    : `<div class="compare"><div><span>In het formulier</span>${esc(c.waarde_in_bron)}</div><div><span>Volgens de cao</span>${esc(c.waarde_cao||"—")}</div></div>`;
+}
+function keuzesControle(c){
+  const d=state.data, ref=heeftCaoRef(d), bo=bronOpties(c);
+  if(bo.length>=2) return [...bo.map(({b,i})=>[`bronidx:${i}`,`Klopt: ${kortDoc(b.document)}`]),
+    ...(ref&&/caoloon/i.test((d.meta.documenten||[]).join(" "))?[["cao","Cao geldt (Caoloon-uitdraai)"]]:[]),
+    ["correctie","Opdrachtgever past het formulier aan: vul in wat geldt"],["vervalt","Niet van toepassing, vervalt"]];
+  return [...(ref?[["cao","Cao geldt voor de uitzendkracht"]]:[]),["bron","Formulier klopt"],["correctie","Opdrachtgever past het formulier aan: vul in wat geldt"],["vervalt","Niet van toepassing, vervalt"]];
+}
+function renderControlesC(){
+  const blok=state.ctrl.map((c,i)=>({c,i})).filter(x=>BLOKKEREND.has(x.c.signaal)).sort((a,b)=>kopVolgorde(a.c.subkop)-kopVolgorde(b.c.subkop));
+  const info=state.ctrl.map((c,i)=>({c,i})).filter(x=>!BLOKKEREND.has(x.c.signaal)&&x.c.signaal!=="voorwaarde_toetsen");
+  const door=state.ctrl.filter(c=>c.signaal==="voorwaarde_toetsen");
+  let h=`<h3 style="margin:24px 0 4px">Controle</h3>`;
+  if(!blok.length) h+=`<div class="msg ok">Geen tegenstrijdigheden en niets wat mogelijk onder de cao ligt.</div>`;
+  h+=blok.map(({c,i})=>{
+    const s=SIGNAAL[c.signaal];
+    const lab=String(c.keuze).startsWith("bronidx:")?"Wat geldt (overgenomen uit de gekozen bron; pas aan als nodig)":c.keuze==="correctie"?"Wat geldt na aanpassing door de opdrachtgever (verplicht)":c.keuze==="bron"&&c.signaal==="mogelijk_onder_cao"?"Waarom is dit niet lager dan de cao? (verplicht)":"Toelichting (optioneel)";
+    return `<article class="ctrl ${s.cls} ${controleGeldig(c)?"done":""}" data-i="${i}">
+      <div class="ctrl-head"><h3>${esc(c.subkop)}</h3><span class="pill">${esc(s.label)}</span></div>
+      ${vergelijkHtml(c)}<p class="reden">${esc(c.reden||"")}</p>
+      <div class="keuzes" role="radiogroup" aria-label="Besluit ${esc(c.subkop)}">${keuzesControle(c).map(([k,l])=>`<label><input type="radio" name="k${i}" value="${k}"${c.keuze===k?" checked":""}> ${esc(l)}</label>`).join("")}</div>
+      <label class="f">${esc(lab)}<textarea rows="2" data-tekst="${i}">${esc(c.tekst)}</textarea></label>
+    </article>`;
+  }).join("");
+  if(info.length) h+=`<h4 class="grp">Ter info <span>bespreek met de opdrachtgever als dat nodig is; blokkeert niets</span></h4>`+info.map(({c,i})=>{
+    const s=SIGNAAL[c.signaal]||{label:c.signaal,cls:"s-ondu"};
+    return `<article class="ctrl ${s.cls} done" data-i="${i}"><div class="ctrl-head"><h3>${esc(c.subkop)}</h3><span class="pill">${esc(s.label)}</span></div>
+      <p style="margin:8px 0 4px">${esc(c.waarde_in_bron)}</p><p class="reden">${esc(c.reden||"")}</p>
+      <label class="f">Notitie (optioneel)<textarea rows="2" data-tekst="${i}">${esc(c.tekst)}</textarea></label></article>`;
+  }).join("");
+  if(door.length) h+=`<div class="msg ok">Naar de inrichting: ${door.map(c=>esc(c.subkop)).join(", ")}. Deze regelingen hebben een voorwaarde die de backoffice bij het inrichten toetst.</div>`;
+  $("#controles").innerHTML=h;
+  document.querySelectorAll("#controles input[type=radio]").forEach(r=>r.onchange=e=>{
+    const i=+e.target.closest(".ctrl").dataset.i, c=state.ctrl[i], oud=c.keuze; c.keuze=e.target.value;
+    if(c.keuze.startsWith("bronidx:")){ const b=c.bronnen[+c.keuze.split(":")[1]]; const vorige=oud&&oud.startsWith("bronidx:")?(c.bronnen[+oud.split(":")[1]]||{}).tekst:""; if(!c.tekst||c.tekst===vorige) c.tekst=b.tekst||""; }
+    renderControlesC(); renderKnoppenC(); tellerC();
+    document.querySelector(`#controles .ctrl[data-i="${i}"] input[value="${e.target.value}"]`)?.focus();
+  });
+  document.querySelectorAll("#controles [data-tekst]").forEach(t=>t.oninput=e=>{
+    const i=+e.target.dataset.tekst; state.ctrl[i].tekst=e.target.value;
+    if(BLOKKEREND.has(state.ctrl[i].signaal)) e.target.closest(".ctrl").classList.toggle("done",controleGeldig(state.ctrl[i]));
+    renderKnoppenC(); tellerC();
+  });
+}
+function tellerC(){ const el=$("#openC"); if(el) el.textContent=state.ctrl.filter(c=>BLOKKEREND.has(c.signaal)&&!controleGeldig(c)).length; }
+function renderUitzC(){
+  const idx=state.uitz.map((u,i)=>({u,i})).sort((a,b)=>kopVolgorde(a.u.subkop)-kopVolgorde(b.u.subkop));
+  const dub=dubbelen(state.uitz), dubSet=new Set(dub.flat());
+  let h=`<details open><summary>Arbeidsvoorwaarden uit het formulier (${state.uitz.length})</summary><p class="hint" style="margin-top:8px">Dit wordt vastgelegd. Pas de tekst of de voorwaarden aan of verwijder een regel als die niet klopt.</p>`;
+  if(dub.length) h+=`<div class="msg warn">Mogelijk dubbel: ${dub.map(([a,b])=>`“${esc(state.uitz[a].subkop)}” en “${esc(state.uitz[b].subkop)}”`).join("; ")}. Controleer of het om dezelfde regeling gaat en verwijder er dan één.</div>`;
+  for(const hk of HOOFDSTUKKEN){
+    const items=idx.filter(x=>hoofdstukVan(x.u.subkop)===hk); if(!items.length) continue;
+    h+=`<div class="uitz-group"><h3>${esc(hk)}</h3>`+items.map(({u,i})=>`<div class="uitz"${dubSet.has(i)?' style="outline:2px solid var(--tegen);outline-offset:4px;border-radius:4px"':""}><div><select data-kop="${i}" aria-label="Kop">${kopOpties(u.subkop)}</select><div class="uitleg">${esc(UITLEG[u.subkop]||"")}</div></div><div><textarea data-afspraak="${i}" aria-label="Afspraak">${esc(u.afspraak)}</textarea><div class="uitleg" style="margin-top:8px">Voorwaarden</div><textarea class="voorw" data-voorw="${i}" aria-label="Voorwaarden" placeholder="Leeg als er geen voorwaarden zijn">${esc(u.voorwaarden||"")}</textarea>${(u.bronnen||[]).length?`<div class="bronnen">Bron: ${esc(u.bronnen.map(b=>[kortDoc(b.document),b.vindplaats].filter(Boolean).join(", ")).join("; "))}</div>`:""}</div><button class="secondary small" data-del="${i}" aria-label="Verwijder">Verwijder</button></div>`).join("")+`</div>`;
+  }
+  h+=`<div class="row"><button class="secondary small" id="nieuw">Arbeidsvoorwaarde toevoegen</button></div></details>`;
+  $("#uitzonderingen").innerHTML=h;
+  document.querySelectorAll("#uitzonderingen [data-kop]").forEach(x=>x.onchange=e=>{state.uitz[+e.target.dataset.kop].subkop=e.target.value; renderUitzC();});
+  document.querySelectorAll("#uitzonderingen [data-afspraak]").forEach(t=>{ t.oninput=e=>state.uitz[+e.target.dataset.afspraak].afspraak=e.target.value; t.onchange=()=>renderUitzC(); });
+  document.querySelectorAll("#uitzonderingen [data-voorw]").forEach(t=>t.oninput=e=>state.uitz[+e.target.dataset.voorw].voorwaarden=e.target.value);
+  document.querySelectorAll("#uitzonderingen [data-del]").forEach(b=>b.onclick=e=>{state.uitz.splice(+e.target.dataset.del,1); renderUitzC(); renderOverzichtC();});
+  $("#nieuw").onclick=()=>{state.uitz.push({subkop:"Overig / niet in cao",afspraak:"",voorwaarden:null,toepassing:"structureel",bronnen:[{document:"handmatig toegevoegd"}]}); renderUitzC(); renderOverzichtC(); const t=document.querySelectorAll("#uitzonderingen [data-afspraak]"); t[t.length-1]?.focus();};
+}
+function renderKnoppenC(){
+  const open=state.ctrl.filter(c=>BLOKKEREND.has(c.signaal)&&!controleGeldig(c)).length;
+  $("#pdfVastlegging").disabled=open>0;
+  msg("#m3",open?"warn":"ok",open?`Nog ${open} controlepunt(en) open. Leg eerst vast wat geldt; bij een tegenstrijdigheid past de opdrachtgever het formulier aan en tekent opnieuw.`:"Klaar om vast te leggen.");
+}
+$("#pdfVastlegging").onclick=async()=>{
+  if(!pdfOk("#m3")) return;
+  try{ const V=maakVastlegging(state); download(await bouwVastlegging(PDFLib,V),`Vastlegging_${slug(V.klant.bedrijfsnaam)}_${V.vastgelegd_op}.pdf`);
+    msg("#m3","ok","Vastleggingsdocument gemaakt. Zet het in HelloFlex; de backoffice leest het in bij ‘Inrichten’."); }
+  catch(e){ msg("#m3","err",`Het document kon niet worden gemaakt: ${esc(e.message)}`); }
+};
+
+/* ---------- Inrichten ---------- */
+function leegI(){ istate=null; msg("#mi3"); ["#i_overzicht","#i_controles","#i_uitz"].forEach(s=>$(s).innerHTML=""); zetStap("#i2",false); zetStap("#i3",false); }
+async function laadVastlegging(f){
+  if(!f) return; leegI(); if(!pdfOk("#mi1")) return;
+  const r=await leesVastlegging(PDFLib,new Uint8Array(await f.arrayBuffer()));
+  if(r.fout){ msg("#mi1","err",esc(r.fout)+" Een getekend formulier of uitvraag lees je eerst in bij ‘Controleren en vastleggen’."); return; }
+  istate=staatUitVastlegging(r.V);
+  msg("#mi1","ok",`Vastlegging van ${esc(r.V.klant.bedrijfsnaam||"opdrachtgever")} (${esc(nlDatum(r.V.vastgelegd_op))}) ingelezen.`);
+  zetStap("#i2",true); zetStap("#i3",true); renderI();
+  $("#i2").scrollIntoView({behavior:ZACHT});
+}
+sleepvak($("#drop_i"),$("#bestand_i"),laadVastlegging);
+function renderI(){ renderOverzichtI(); renderControlesI(); renderUitzI(); renderKnoppenI(); }
+function renderOverzichtI(){
+  const d=istate.data, v=verzamel(istate);
+  $("#i_overzicht").innerHTML=`<dl class="facts">
+    <div><dt>Opdrachtgever</dt><dd>${esc(d.klant.bedrijfsnaam||"—")}</dd></div>
+    <div><dt>Cao</dt><dd>${d.cao.van_toepassing?esc(d.cao.naam||"—"):"Geen cao, eigen loongebouw"}</dd></div>
+    <div><dt>Vastgelegd</dt><dd>${esc(nlDatum(istate.vastgelegd_op))} door ${esc(istate.intercedent||"—")}</dd></div>
+    <div><dt>Uitlener</dt><dd>${esc(istate.uitlener||"—")}</dd></div></dl>
+    <p class="tally"><span><b>${istate.uitz.length}</b> arbeidsvoorwaarden</span><span><b>${istate.ctrl.length}</b> met voorwaarde (<span id="openTel">${v.open.length}</span> open, waarvan <span id="openEss">${v.openEss.length}</span> essentieel)</span></p>`;
+}
+function renderControlesI(){
+  if(!istate.ctrl.length){ $("#i_controles").innerHTML=""; return; }
+  const volgorde=istate.ctrl.map((c,i)=>i).sort((a,b)=>sorteerSleutel(istate.ctrl[a])-sorteerSleutel(istate.ctrl[b]));
+  let vorige=null;
+  $("#i_controles").innerHTML=`<h3 style="margin:24px 0 4px">Voorwaarden toetsen</h3>`+volgorde.map(i=>{
+    const c=istate.ctrl[i], g=groep(c);
+    let kop=""; if(g!==vorige){ vorige=g; const n=istate.ctrl.filter(x=>groep(x)===g).length, o=istate.ctrl.filter(x=>groep(x)===g&&!controleGeldig(x)).length; kop=`<h4 class="grp grp-${g}">${esc(GROEP_LABEL[g])} <span>${n} punt(en), ${o} open</span></h4>`; }
+    const toep=g==="essentieel"?`<span class="pill pill-ess">Essentieel</span>`:`<select class="toep" data-ctoep="${i}" aria-label="Toepassing"><option value="structureel"${c.toepassing!=="voorwaardelijk"?" selected":""}>Structureel</option><option value="voorwaardelijk"${c.toepassing==="voorwaardelijk"?" selected":""}>Alleen onder voorwaarden</option></select>`;
+    return kop+`<article class="ctrl s-voorw ${controleGeldig(c)?"done":""}" data-i="${i}">
+      <div class="ctrl-head"><h3>${esc(c.subkop)}</h3><span class="ctrl-tags">${toep}<span class="pill">Voorwaarde toetsen</span></span></div>
+      <p style="margin:8px 0 4px">${esc(c.waarde_in_bron)}</p><p class="reden">Voorwaarde: ${esc(c.reden||"—")}</p>
+      <div class="keuzes" role="radiogroup" aria-label="Besluit ${esc(c.subkop)}">${KEUZES_VOORW.map(([k,l])=>`<label><input type="radio" name="ik${i}" value="${k}"${c.keuze===k?" checked":""}> ${esc(l)}</label>`).join("")}</div>
+      <label class="f">Toelichting (optioneel)<textarea rows="2" data-tekst="${i}">${esc(c.tekst)}</textarea></label></article>`;
+  }).join("");
+  document.querySelectorAll("#i_controles input[type=radio]").forEach(r=>r.onchange=e=>{ const i=+e.target.closest(".ctrl").dataset.i; istate.ctrl[i].keuze=e.target.value; renderControlesI(); renderOverzichtI(); renderKnoppenI(); });
+  document.querySelectorAll("#i_controles [data-ctoep]").forEach(x=>x.onchange=e=>{ const c=istate.ctrl[+e.target.dataset.ctoep]; c.toepassing=e.target.value; if(c.toepassing==="voorwaardelijk"&&!c.keuze) c.keuze="pergeval"; renderControlesI(); renderOverzichtI(); renderKnoppenI(); });
+  document.querySelectorAll("#i_controles [data-tekst]").forEach(t=>t.oninput=e=>{ istate.ctrl[+e.target.dataset.tekst].tekst=e.target.value; });
+}
+const KEUZES_VOORW=[
+  ["bron","Uitzendkracht kan aan de voorwaarde voldoen: de regeling geldt"],
+  ["pergeval","Per geval bepalen door de backoffice"],
+  ["vervalt","Niet van toepassing, vervalt"]
+];
+function renderUitzI(){
+  const idx=istate.uitz.map((u,i)=>({u,i})).sort((a,b)=>sorteerSleutel(a.u)-sorteerSleutel(b.u));
+  let vorige=null;
+  let h=`<h3 style="margin:24px 0 4px">Vastgelegde arbeidsvoorwaarden</h3><p class="hint">Wat vastgelegd is, pas je hier niet aan. Kies alleen hoe het wordt ingericht.</p>`;
+  if(!idx.length) h+=`<div class="msg ok">Geen afwijkingen: inrichten conform de cao.</div>`;
+  h+=idx.map(({u,i})=>{
+    const g=groep(u); let kop=""; if(g!==vorige){ vorige=g; kop=`<h4 class="grp grp-${g}">${esc(GROEP_LABEL[g])}</h4>`; }
+    const toep=g==="essentieel"?`<span class="pill pill-ess">Essentieel</span>`:`<select class="toep" data-utoep="${i}" aria-label="Toepassing"><option value="structureel"${u.toepassing!=="voorwaardelijk"?" selected":""}>Structureel</option><option value="voorwaardelijk"${u.toepassing==="voorwaardelijk"?" selected":""}>Alleen onder voorwaarden</option></select>`;
+    return kop+`<article class="ctrl done" style="--sig:var(--line)"><div class="ctrl-head"><h3>${esc(u.subkop)}</h3><span class="ctrl-tags">${toep}</span></div>
+      <p style="margin:8px 0 2px">${esc(u.afspraak)}</p>${u.voorwaarden?`<p class="reden">Voorwaarden: ${esc(u.voorwaarden)}</p>`:""}${(u.bronnen||[]).length?`<div class="bronnen">Bron: ${esc(u.bronnen.map(b=>b.document).join("; "))}</div>`:""}</article>`;
+  }).join("");
+  $("#i_uitz").innerHTML=h;
+  document.querySelectorAll("#i_uitz [data-utoep]").forEach(x=>x.onchange=e=>{ istate.uitz[+e.target.dataset.utoep].toepassing=e.target.value; renderUitzI(); });
+}
+function renderKnoppenI(){
+  const v=verzamel(istate), openEss=v.openEss.length, open=v.open.length;
+  $("#pdfInrichting").disabled=openEss>0;
+  msg("#mi3",openEss||open?"warn":"ok",openEss?`Beoordeel eerst de ${openEss} essentiële punt(en).`:open?`Het inrichtingsformulier kan worden gedownload. ${open} niet-essentieel punt(en) komen onder ‘Nog te beoordelen’.`:"Klaar om het inrichtingsformulier te maken.");
+}
+$("#pdfInrichting").onclick=async()=>{
+  if(!pdfOk("#mi3")) return;
+  try{ download(await bouwInrichting(PDFLib,istate),`Inrichtingsformulier_${slug(istate.data.klant.bedrijfsnaam)}_${vandaag()}.pdf`); }
+  catch(e){ msg("#mi3","err",`Het formulier kon niet worden gemaakt: ${esc(e.message)}`); }
+};
 </script>
 </body>
 </html>

@@ -4,12 +4,13 @@ Interne tool die het beloningsregister vervangt. Intercedenten leggen hiermee de
 
 De hele tool is één bestand: [`index.html`](index.html). Alles draait in de browser; er wordt niets opgeslagen of verstuurd. Alleen de PDF-bibliotheek (cdnjs) en het lettertype (Google Fonts) worden van buiten geladen.
 
-## Twee routes
+## Drie stappen (werkinstructie ‘Nieuwe klant’)
 
-| Route | Wanneer | Wat de tool maakt |
+| Tab | Wie · stap | Wat de tool maakt |
 |---|---|---|
-| **Formulier van de opdrachtgever** | De opdrachtgever heeft een formulier (bijv. wijzerbelonen.nl) en/of regelingen aangeleverd, of heeft een eigen loongebouw. | Inrichtingsdocument (intern) en, bij correcties, een aanvulling die met het formulier in HelloFlex wordt getekend. |
-| **Alleen een cao** | Er is nog geen formulier; de cao (Caoloon) is de basis. | Invulbare uitvraag "Geeft u meer dan de cao?". De ingevulde uitvraag wordt ingelezen via het sleepvak van de route "Formulier van de opdrachtgever". |
+| **Uitvraag opmaken** | Intercedent · D1 route 2 | Eén PDF: invulbare uitvraag “Geeft u meer dan de cao?” met akkoordverklaring, plus de Caoloon-uitdraai als bijlage. Gaat in HelloFlex ter ondertekening. |
+| **Controleren en vastleggen** | Intercedent · E1–E2 | Leest het bestand van de beloningsassistent (route 1 en 3) of de getekende uitvraag (route 2) in. Controle op *tegenstrijdig* en *mogelijk onder cao*; overige signalen ter info. Levert het **vastleggingsdocument** (definitieve arbeidsvoorwaarden met voorwaarden en bron, plus de controle), met de gegevens onzichtbaar erin. |
+| **Inrichten** | Backoffice · E4 | Leest het vastleggingsdocument in. Toetst voorwaarden en bepaalt essentieel / structureel / voorwaardelijk. Levert het **inrichtingsformulier**. |
 
 De omzetting van formulieren gebeurt met een vaste ChatGPT-assistent. De instructies (prompt) van die assistent staan bewust niet in deze repository. Het gedeelde veldformaat staat in [`docs/veldschema.json`](docs/veldschema.json).
 
